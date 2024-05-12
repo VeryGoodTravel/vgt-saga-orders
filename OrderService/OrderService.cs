@@ -5,7 +5,6 @@ using NLog;
 using Npgsql;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using vgt_saga_orders.Orchestrator;
 using vgt_saga_serialization;
 
 namespace vgt_saga_orders.OrderService;

@@ -31,7 +31,7 @@ public static class SecretUtils
             ? ThrowException<string>("DB_PASSWORD", log)
             : config.GetValue<string>("DB_PASSWORD")!;
         
-        return $"Server={dbServer};Database={db};Uid={dbUser};Pwd={password};";
+        return $"Host={dbServer}; Database={db}; Username={dbUser}; Password={password};";
     }
 
     /// <summary>
