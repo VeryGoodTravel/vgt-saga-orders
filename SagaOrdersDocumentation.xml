@@ -44,7 +44,52 @@
         </member>
         <member name="P:vgt_saga_orders.Models.Transaction.OfferId">
             <summary>
-            Id of the offer as specified by the backend (verifies if another transaction for this 
+            ID of the offer as specified by the backend
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.BookFrom">
+            <summary>
+            Date to book the hotel from (also the date of the flight)
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.BookTo">
+            <summary>
+            Date to book the hotel to (also the date of the return flight)
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.TripFrom">
+            <summary>
+            City of the airport the clients are going to fly off
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.HotelName">
+            <summary>
+            Hotel specified in the offer
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.RoomType">
+            <summary>
+            Room type selected
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.AdultCount">
+            <summary>
+            How many adults in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.OldChildren">
+            <summary>
+            How many children under 18yo in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.MidChildren">
+            <summary>
+            How many children under 10yo in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.LesserChildren">
+            <summary>
+            How many children under 3yo in the booking request
             </summary>
         </member>
         <member name="T:vgt_saga_orders.Orchestrator.IServiceHandler">
