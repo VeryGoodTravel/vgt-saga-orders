@@ -1,6 +1,9 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore;
+using NLog;
 using NLog.Extensions.Logging;
 using RabbitMQ.Client.Exceptions;
+using vgt_saga_orders;
+using vgt_saga_orders.Models;
 using vgt_saga_orders.Orchestrator;
 using vgt_saga_orders.OrderService;
 using ILogger = NLog.ILogger;
@@ -38,10 +41,11 @@ catch (InvalidDataException e)
     Console.WriteLine(e);
     Environment.Exit(0);
 }
+var logger = LogManager.GetCurrentClassLogger();
+builder.Services.AddDbContext<SagaDbContext>(options => options.UseNpgsql(SecretUtils.GetConnectionString(builder.Configuration, "DB_NAME_SAGA", logger)));
 
 var app = builder.Build();
 
-var logger = LogManager.GetCurrentClassLogger();
 var lf = app.Services.GetRequiredService<ILoggerFactory>();
 logger.Info("Hello word");
 

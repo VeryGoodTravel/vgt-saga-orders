@@ -50,7 +50,7 @@ public class OrderService : IDisposable
         _jsonUtils = new Utils(_logger);
         CreateChannels();
         
-        var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_ORDR", _logger);
+        var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_SAGA", _logger);
         
         _eventStore = Wireup.Init()
             .WithLoggerFactory(lf)

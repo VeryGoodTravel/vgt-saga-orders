@@ -4,6 +4,49 @@
         <name>vgt-saga-orders</name>
     </assembly>
     <members>
+        <member name="T:vgt_saga_orders.Migrations.Initial">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:vgt_saga_orders.Models.SagaDbContext">
+            <inheritdoc />
+        </member>
+        <member name="P:vgt_saga_orders.Models.SagaDbContext.Transactions">
+            <summary>
+            Set of Database Transaction entities mapped to Transaction objects
+            </summary>
+        </member>
+        <member name="M:vgt_saga_orders.Models.SagaDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{vgt_saga_orders.Models.SagaDbContext})">
+            <inheritdoc />
+        </member>
+        <member name="T:vgt_saga_orders.Models.Transaction">
+            <summary>
+            Transaction object representing an object from the database
+            </summary>
+        </member>
+        <member name="M:vgt_saga_orders.Models.Transaction.#ctor">
+            <summary>
+            Transaction object representing an object from the database
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.TransactionId">
+            <summary>
+            Guid of the SAGA transaction
+            </summary>
+        </member>
+        <member name="P:vgt_saga_orders.Models.Transaction.OfferId">
+            <summary>
+            Id of the offer as specified by the backend (verifies if another transaction for this 
+            </summary>
+        </member>
         <member name="T:vgt_saga_orders.Orchestrator.IServiceHandler">
             <summary>
             Orchestrator handlers of the services in the SAGA architecture,

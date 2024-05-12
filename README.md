@@ -3,6 +3,20 @@
 Main repository of the saga process.
 Contains both orders microservice and orchestrator
 
+## Data storage (PostgreSQL)
+
+Follows CQRS and Event Sourcing.
+
+Read Database of the CQRS consists of the one main table:
+Transactions -> contains current information about each SAGA transaction with its SAGA state, 
+answers from the services and the information on the trip parts.
+
+![Database schema](DB_SAGA.png)
+
+Event store is organised with the NEventStore C# library and has the following integration with CQRS:
+
+![CQRS schema](CQRS.png)
+
 ## Repository
 
 This repository contains additional submodules containing shared libraries of the SAGA microservices implementations.
@@ -28,9 +42,9 @@ To update those submodules in the local branch run:
 - RABBIT_HOTEL -> Queue of the requests sent by the orchestrator to the hotel service.
 - RABBIT_FLIGHT -> Queue of the requests sent by the orchestrator to the flight service.
 - DB_SERVER -> Database server name to use
-- DB_NAME_ORDR -> Database name to use for the order service
-- DB_NAME_ORCH -> Database name to use for the orchestrator
+- DB_NAME_SAGA -> Database name to use for the order service and the orchestrator
 - DB_PASSWORD -> Database password to use for the database server
+- DB_USER -> Username to use for the database server
 
 ## Implementation documentation
 XML docs of the project available in the repository in the
