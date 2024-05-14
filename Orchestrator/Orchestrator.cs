@@ -24,7 +24,6 @@ public class Orchestrator : IDisposable
 
     private readonly List<MessageType> _keys =
     [
-        MessageType.OrderReply, MessageType.PaymentReply, MessageType.HotelReply, MessageType.FlightReply,
         MessageType.OrderRequest, MessageType.PaymentRequest, MessageType.HotelRequest, MessageType.FlightRequest
     ];
 
@@ -70,8 +69,7 @@ public class Orchestrator : IDisposable
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
 
-        _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest],
-            _repliesChannels[MessageType.OrderReply], _publish, _eventStore, _logger);
+        _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest], _publish, _eventStore, _logger);
         // TODO: Add tasks for each service
 
         _queues = new RepliesQueueHandler(config1, _logger);
@@ -97,7 +95,7 @@ public class Orchestrator : IDisposable
                 case MessageType.FlightRequest or MessageType.FlightReply:
                     _queues.PublishToFlight(_jsonUtils.Serialize(message));
                     break;
-                case MessageType.OrderRequest or MessageType.OrderReply:
+                case MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendRequest or MessageType.BackendReply:
                     _queues.PublishToOrders(_jsonUtils.Serialize(message));
                     break;
                 case MessageType.PaymentRequest or MessageType.PaymentReply:
@@ -125,7 +123,18 @@ public class Orchestrator : IDisposable
         var message = reply.Value;
 
         // send message reply to the appropriate task
-        var result = _repliesChannels[message.MessageType].Writer.TryWrite(message);
+        var result = message.MessageType switch
+        {
+            MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendReply or MessageType.BackendRequest
+                => _repliesChannels[MessageType.OrderRequest].Writer.TryWrite(message),
+            MessageType.HotelReply or MessageType.HotelRequest
+                => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
+            MessageType.FlightReply or MessageType.FlightRequest
+                => _repliesChannels[MessageType.FlightRequest].Writer.TryWrite(message),
+            MessageType.PaymentReply or MessageType.PaymentRequest 
+                => _repliesChannels[MessageType.PaymentRequest].Writer.TryWrite(message),
+            _ => false
+        };
 
         if (result) _logger.Debug("Replied routed successfuly to {type} handler", message.MessageType.ToString());
         else _logger.Warn("Something went wrong in routing to {type} handler", message.MessageType.ToString());

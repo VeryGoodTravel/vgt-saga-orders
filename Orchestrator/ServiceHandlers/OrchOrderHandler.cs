@@ -8,21 +8,16 @@ namespace vgt_saga_orders.Orchestrator.ServiceHandlers;
 /// <inheritdoc />
 public class OrchOrderHandler : IServiceHandler
 {
-    
     /// <inheritdoc />
-    public Channel<Message> Replies { get; }
-    /// <inheritdoc />
-    public Channel<Message> Requests { get; }
+    public Channel<Message> Messages { get; }
+
     /// <inheritdoc />
     public Channel<Message> Publish { get; }
     /// <inheritdoc />
-    public Message CurrentRequest { get; set; }
-    /// <inheritdoc />
-    public Message CurrentReply { get; set; }
+    public Message Request { get; set; }
+    
     /// <inheritdoc />
     public Task RequestsTask { get; set; }
-    /// <inheritdoc />
-    public Task RepliesTask { get; set; }
     
     private IStoreEvents EventStore { get; }
     
@@ -40,41 +35,32 @@ public class OrchOrderHandler : IServiceHandler
     /// <param name="publish"> Messages that need to be sent to the broker </param>
     /// <param name="eventStore"> Event sourcing </param>
     /// <param name="log"> logger to use </param>
-    public OrchOrderHandler(Channel<Message> replies, Channel<Message> requests, Channel<Message> publish, IStoreEvents eventStore, Logger log)
+    public OrchOrderHandler(Channel<Message> messages, Channel<Message> publish, IStoreEvents eventStore, Logger log)
     {
         _logger = log;
-        Replies = replies;
-        Requests = requests;
+        Messages = messages;
         EventStore = eventStore;
         Publish = publish;
         
         _logger.Debug("Starting tasks handling the messages");
         RequestsTask = Task.Run(HandleRequests);
-        RepliesTask = Task.Run(HandleReplies);
         _logger.Debug("Tasks handling the messages started");
     }
 
     private async Task HandleRequests()
     {
-        while (await Requests.Reader.WaitToReadAsync(Token))
+        while (await Messages.Reader.WaitToReadAsync(Token))
         {
-            CurrentRequest = await Requests.Reader.ReadAsync(Token);
-            // TODO: do something with the request and add it to the handle replies
-        }
-    }
-    
-    private async Task HandleReplies()
-    {
-        while (await Replies.Reader.WaitToReadAsync(Token))
-        {
-            CurrentReply = await Replies.Reader.ReadAsync(Token);
+            Request = await Messages.Reader.ReadAsync(Token);
             
-            if (CurrentReply.State == SagaState.Begin)
+            if (Request.State == SagaState.Begin)
             {
-                AppendToStream(CurrentRequest);
+                await Publish.Writer.WriteAsync(Request, Token);
+                //AppendToStream(Request);
             }
-
-            LoadFromStream(CurrentReply.TransactionId);
+            
+            
+            //LoadFromStream(Request.TransactionId);
         }
     }
     

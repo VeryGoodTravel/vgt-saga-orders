@@ -1,11 +1,15 @@
 using System.Threading.Channels;
+using Microsoft.EntityFrameworkCore;
 using NEventStore;
 using NEventStore.Serialization.Json;
+using Newtonsoft.Json;
 using NLog;
 using Npgsql;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
+using vgt_saga_orders.Models;
 using vgt_saga_serialization;
+using vgt_saga_serialization.MessageBodies;
 
 namespace vgt_saga_orders.OrderService;
 
@@ -22,7 +26,8 @@ public class OrderService : IDisposable
     private readonly IStoreEvents _eventStore;
 
     private readonly List<MessageType> _keys = [MessageType.OrderReply, MessageType.OrderRequest];
-    private readonly Dictionary<MessageType, Channel<Message>> _repliesChannels = [];
+    private readonly Channel<TransactionBody> _backendMessages;
+    private readonly Channel<Message> _orchestratorMessages;
     private readonly Channel<Message> _publish;
     private readonly OrderHandler _orderHandler;
     
@@ -48,27 +53,28 @@ public class OrderService : IDisposable
         _config = config;
 
         _jsonUtils = new Utils(_logger);
-        CreateChannels();
         
         var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_SAGA", _logger);
+        var options = new DbContextOptionsBuilder<SagaDbContext>();
+        options.UseNpgsql(connStr);
+        var writeDb = new SagaDbContext(options.Options);
         
-        _eventStore = Wireup.Init()
-            .WithLoggerFactory(lf)
-            .UsingInMemoryPersistence()
-            .UsingSqlPersistence(NpgsqlFactory.Instance, connStr)
-            .InitializeStorageEngine()
-            .UsingJsonSerialization()
-            .Compress()
-            .Build();
+        _logger.Debug("Creating tasks message channels");
+        _backendMessages = Channel.CreateUnbounded<TransactionBody>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        _orchestratorMessages = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        _logger.Debug("Tasks message channels created");
 
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         
-        _orderHandler = new OrderHandler(_repliesChannels[MessageType.OrderRequest], _repliesChannels[MessageType.OrderReply], _publish, _eventStore, _logger);
+        _orderHandler = new OrderHandler(_orchestratorMessages, _backendMessages, _publish, writeDb, _logger);
 
         _queues = new OrderQueueHandler(_config, _logger);
         
         _queues.AddRepliesConsumer(SagaOrdersEventHandler);
+        _queues.AddBackendConsumer(BackendOrdersEventHandler);
     }
 
     /// <summary>
@@ -82,7 +88,7 @@ public class OrderService : IDisposable
 
             if (message.MessageType != MessageType.BackendReply && message.MessageType != MessageType.BackendRequest)
             {
-                _queues.PublishToBackend(_jsonUtils.Serialize(message));
+                _queues.PublishToBackend(JsonConvert.SerializeObject((BackendReply)message.Body));
             }
             else
             {
@@ -109,7 +115,7 @@ public class OrderService : IDisposable
         var message = reply.Value;
 
         // send message reply to the appropriate task
-        var result = _repliesChannels[message.MessageType].Writer.TryWrite(message);
+        var result = _orchestratorMessages.Writer.TryWrite(message);
         
         if (result) _logger.Debug("Replied routed successfuly to {type} handler", message.MessageType.ToString());
         else _logger.Warn("Something went wrong in routing to {type} handler", message.MessageType.ToString());
@@ -128,35 +134,19 @@ public class OrderService : IDisposable
         _logger.Debug("Received response | Tag: {tag}", ea.DeliveryTag);
         var body = ea.Body.ToArray();
 
-        var reply = _jsonUtils.Deserialize(body);
+        var reply = _jsonUtils.DeserializeBackend(body);
 
         if (reply == null) return;
 
         var message = reply.Value;
 
         // send message reply to the appropriate task
-        var result = _repliesChannels[message.MessageType].Writer.TryWrite(message);
+        var result = _backendMessages.Writer.TryWrite(message);
         
-        if (result) _logger.Debug("Replied routed successfuly to {type} handler", message.MessageType.ToString());
-        else _logger.Warn("Something went wrong in routing to {type} handler", message.MessageType.ToString());
+        if (result) _logger.Debug("Replied routed successfuly to backend handler");
+        else _logger.Warn("Something went wrong in routing to backend handler");
 
         _queues.PublishBackendTagResponse(ea, result);
-    }
-
-    /// <summary>
-    /// Creates async channels to send received messages with to the tasks handling them.
-    /// Channels are stored in the dictionary MessageType - Channel
-    /// </summary>
-    private void CreateChannels()
-    {
-        _logger.Debug("Creating tasks message channels");
-        foreach (var key in _keys)
-        {
-            _repliesChannels[key] = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
-                { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
-        }
-
-        _logger.Debug("Tasks message channels created");
     }
 
     /// <inheritdoc/>

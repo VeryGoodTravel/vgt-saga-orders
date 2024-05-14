@@ -52,8 +52,4 @@
         <_ContentIncludedByDefault Remove="vgt-saga-order\Properties\launchSettings.json"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Orchestrator\SagaEvents\" />
-    </ItemGroup>
-
 </Project>

@@ -1,7 +1,9 @@
 using System.Threading.Channels;
 using NEventStore;
 using NLog;
+using vgt_saga_orders.Models;
 using vgt_saga_serialization;
+using vgt_saga_serialization.MessageBodies;
 
 namespace vgt_saga_orders.OrderService;
 
@@ -12,14 +14,16 @@ namespace vgt_saga_orders.OrderService;
 /// </summary>
 public class OrderHandler
 {
+    
     /// <summary>
-    /// Replies received from the orchestrator
+    /// Messages from the backend to handle
     /// </summary>
-    public Channel<Message> Replies { get; }
+    public Channel<TransactionBody> BackendMessages { get; }
+    
     /// <summary>
-    /// Requests to the orchestrator
+    /// Messages from the orchestrator to handle
     /// </summary>
-    public Channel<Message> Requests { get; }
+    public Channel<Message> OrchestratorMessages { get; }
     
     /// <summary>
     /// Messages that need to be sent out to the queues
@@ -29,15 +33,15 @@ public class OrderHandler
     /// <summary>
     /// current request handled
     /// </summary>
-    public Message CurrentRequest { get; set; }
+    public TransactionBody CurrentRequest { get; set; }
     
     /// <summary>
     /// current reply handled
     /// </summary>
     public Message CurrentReply { get; set; }
     private Logger _logger;
-    
-    private IStoreEvents EventStore { get; }
+
+    private readonly SagaDbContext _db;
     
     /// <summary>
     /// Task of the requests handler
@@ -61,15 +65,15 @@ public class OrderHandler
     /// <param name="replies"> Queue with the replies from the orchestrator </param>
     /// <param name="requests"> Queue with the requests to the orchestrator </param>
     /// <param name="publish"> Queue with messages that need to be published to RabbitMQ </param>
-    /// <param name="eventStore"> EventStore for the event sourcing and CQRS </param>
+    /// <param name="db"> Database used </param>
     /// <param name="log"> logger to log to </param>
-    public OrderHandler(Channel<Message> replies, Channel<Message> requests, Channel<Message> publish, IStoreEvents eventStore, Logger log)
+    public OrderHandler(Channel<Message> replies, Channel<TransactionBody> requests, Channel<Message> publish, SagaDbContext db, Logger log)
     {
         _logger = log;
-        Replies = replies;
-        Requests = requests;
+        OrchestratorMessages = replies;
+        BackendMessages = requests;
         Publish = publish;
-        EventStore = eventStore;
+        _db = db;
 
         _logger.Debug("Starting tasks handling the messages");
         RequestsTask = Task.Run(HandleRequests);
@@ -79,23 +83,78 @@ public class OrderHandler
 
     private async Task HandleRequests()
     {
-        while (await Requests.Reader.WaitToReadAsync(Token))
+        while (await BackendMessages.Reader.WaitToReadAsync(Token))
         {
-            CurrentRequest = await Requests.Reader.ReadAsync(Token);
-
-            // TODO: do something with the request
+            CurrentRequest = await BackendMessages.Reader.ReadAsync(Token);
+            _logger.Debug("Handling backend message | TransactionID {tId}", CurrentRequest.TransactionId);
             
-            await Publish.Writer.WriteAsync(CurrentRequest, Token);
+            var trans = new Transaction()
+            {
+                TransactionId = CurrentRequest.TransactionId,
+                OfferId = CurrentRequest.OfferId,
+                BookFrom = CurrentRequest.BookFrom,
+                BookTo = CurrentRequest.BookTo,
+                TripFrom = CurrentRequest.TripFrom,
+                TripTo = CurrentRequest.TripTo,
+                HotelName = CurrentRequest.HotelName,
+                RoomType = CurrentRequest.RoomType,
+                AdultCount = CurrentRequest.AdultCount,
+                OldChildren = CurrentRequest.OldChildren,
+                MidChildren = CurrentRequest.MidChildren,
+                LesserChildren = CurrentRequest.LesserChildren
+            };
+            await _db.Transactions.AddAsync(trans, Token);
+            _logger.Debug("Created a transaction entity in the db");
+            
+            var sagaHotel = new Message()
+            {
+                TransactionId = CurrentRequest.TransactionId,
+                MessageId = 0,
+                CreationDate = DateTime.Now,
+                MessageType = MessageType.HotelRequest,
+                State = SagaState.Begin,
+                Body = new HotelRequest()
+                {
+                    Temporary = true,
+                    RoomType = trans.RoomType,
+                    HotelName = trans.HotelName,
+                    BookFrom = trans.BookFrom,
+                    BookTo = trans.BookTo,
+                    TemporaryDateTime = DateTime.MinValue
+                }
+            };
+            await Publish.Writer.WriteAsync(sagaHotel, Token);
+            _logger.Debug("Sent a saga message concerning hotel to the orchestrator");
+            
+            var sagaFlight = new Message()
+            {
+                TransactionId = CurrentRequest.TransactionId,
+                MessageId = 0,
+                CreationDate = DateTime.Now,
+                MessageType = MessageType.FlightRequest,
+                State = SagaState.Begin,
+                Body = new FlightRequest()
+                {
+                    Temporary = true,
+                    CityFrom = trans.TripFrom,
+                    CityTo = trans.TripTo,
+                    BookFrom = trans.BookFrom,
+                    BookTo = trans.BookTo,
+                    TemporaryDateTime = DateTime.MinValue,
+                    PassangerCount = trans.AdultCount + trans.LesserChildren + trans.MidChildren + trans.OldChildren
+                }
+            };
+            await Publish.Writer.WriteAsync(sagaFlight, Token);
+            _logger.Debug("Sent a saga message concerning flight to the orchestrator");
         }
     }
     
     private async Task HandleReplies()
     {
-        while (await Replies.Reader.WaitToReadAsync(Token))
+        while (await OrchestratorMessages.Reader.WaitToReadAsync(Token))
         {
-            CurrentReply = await Replies.Reader.ReadAsync(Token);
-            
-            // TODO: do something with the reply
+            CurrentReply = await OrchestratorMessages.Reader.ReadAsync(Token);
+            if (CurrentReply.Body == null) continue;
             
             await Publish.Writer.WriteAsync(CurrentReply, Token);
         }
