@@ -53,13 +53,21 @@ public class OrchOrderHandler : IServiceHandler
         {
             Request = await Messages.Reader.ReadAsync(Token);
             
-            if (Request.State == SagaState.Begin)
+            switch (Request.State)
             {
-                await Publish.Writer.WriteAsync(Request, Token);
+                case SagaState.Begin:
+                    await Publish.Writer.WriteAsync(Request, Token);
+                    break;
                 //AppendToStream(Request);
+                case SagaState.SagaFail:
+                    
+                    
+                    await Publish.Writer.WriteAsync(Request, Token);
+                    //AppendToStream(Request);
+                    break;
             }
-            
-            
+
+
             //LoadFromStream(Request.TransactionId);
         }
     }

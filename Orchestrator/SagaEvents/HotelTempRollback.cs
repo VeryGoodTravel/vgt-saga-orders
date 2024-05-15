@@ -1,6 +1,13 @@
-namespace vgt_saga_orders.Orchestrator.SagaEvents;
+using vgt_saga_serialization;
 
-public struct HotelTempRollback
+namespace vgt_saga_orders.Orchestrator.SagaEvents;
+/// <inheritdoc/>
+public struct HotelTempRollback : IEvent
 {
-    
+    /// <inheritdoc/>
+    public Guid TransactionId { get; set; }
+    /// <inheritdoc/>
+    public SagaState? State { get; set; }
+    /// <inheritdoc/>
+    public bool Answer { get; set; }
 }

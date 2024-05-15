@@ -1,6 +1,14 @@
+using vgt_saga_serialization;
+
 namespace vgt_saga_orders.Orchestrator.SagaEvents;
 
-public struct FlightTempBooked
+/// <inheritdoc/>
+public struct FlightTempBooked : IEvent
 {
-    
+    /// <inheritdoc/>
+    public Guid TransactionId { get; set; }
+    /// <inheritdoc/>
+    public SagaState? State { get; set; }
+    /// <inheritdoc/>
+    public bool Answer { get; set; }
 }

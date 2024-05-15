@@ -20,6 +20,8 @@ public class Orchestrator : IDisposable
     private readonly Logger _logger;
     private readonly Utils _jsonUtils;
     private readonly OrchOrderHandler _orchOrderHandler;
+    private readonly OrchBookHandler _orchBookHandler;
+    private readonly OrchPaymentHandler _orchPaymentHandler;
     private readonly IStoreEvents _eventStore;
 
     private readonly List<MessageType> _keys =
@@ -70,6 +72,8 @@ public class Orchestrator : IDisposable
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
 
         _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest], _publish, _eventStore, _logger);
+        _orchBookHandler = new OrchBookHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
+        _orchPaymentHandler = new OrchPaymentHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
         // TODO: Add tasks for each service
 
         _queues = new RepliesQueueHandler(config1, _logger);
@@ -127,10 +131,8 @@ public class Orchestrator : IDisposable
         {
             MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendReply or MessageType.BackendRequest
                 => _repliesChannels[MessageType.OrderRequest].Writer.TryWrite(message),
-            MessageType.HotelReply or MessageType.HotelRequest
+            MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
                 => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
-            MessageType.FlightReply or MessageType.FlightRequest
-                => _repliesChannels[MessageType.FlightRequest].Writer.TryWrite(message),
             MessageType.PaymentReply or MessageType.PaymentRequest 
                 => _repliesChannels[MessageType.PaymentRequest].Writer.TryWrite(message),
             _ => false
