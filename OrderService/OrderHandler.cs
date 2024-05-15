@@ -1,4 +1,6 @@
 using System.Threading.Channels;
+using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using NEventStore;
 using NLog;
 using vgt_saga_orders.Models;
@@ -57,6 +59,7 @@ public class OrderHandler
     /// Token allowing tasks cancellation from the outside of the class
     /// </summary>
     public CancellationToken Token { get; } = new();
+    private SemaphoreSlim DbLock { get; } = new SemaphoreSlim(1, 1);
 
     /// <summary>
     /// Default constructor of the order handler class
@@ -103,7 +106,10 @@ public class OrderHandler
                 MidChildren = CurrentRequest.MidChildren,
                 LesserChildren = CurrentRequest.LesserChildren
             };
+            await DbLock.WaitAsync(Token);
             await _db.Transactions.AddAsync(trans, Token);
+            await _db.SaveChangesAsync(Token);
+            DbLock.Release();
             _logger.Debug("Created a transaction entity in the db");
             
             var sagaHotel = new Message()
@@ -153,10 +159,86 @@ public class OrderHandler
     {
         while (await OrchestratorMessages.Reader.WaitToReadAsync(Token))
         {
-            CurrentReply = await OrchestratorMessages.Reader.ReadAsync(Token);
+            var reply = await OrchestratorMessages.Reader.ReadAsync(Token);
             if (CurrentReply.Body == null) continue;
             
-            await Publish.Writer.WriteAsync(CurrentReply, Token);
+            await DbLock.WaitAsync(Token);
+            var dbData = await _db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == reply.TransactionId, Token);
+            DbLock.Release();
+            
+            if (dbData == null) continue;
+
+            if (reply.State == SagaState.SagaSuccess)
+            {
+                reply.State = SagaState.SagaSuccess;
+                reply.MessageType = MessageType.BackendReply;
+                reply.Body = new BackendReply()
+                {
+                    Answer = SagaAnswer.Success,
+                    OfferId = dbData.OfferId,
+                    TransactionId = reply.TransactionId
+                };
+                
+                await Publish.Writer.WriteAsync(reply, Token);
+                continue;
+            }
+
+            // send it to the payment service
+            if (dbData.FullBookFlight != null && dbData.FullBookHotel != null &&
+                !dbData.FullBookFlight.Value && !dbData.FullBookHotel.Value ||
+                dbData.TempBookFlight != null && dbData.TempBookHotel != null &&
+                !dbData.TempBookFlight.Value && !dbData.TempBookHotel.Value)
+            {
+                reply.State = SagaState.SagaFail;
+                reply.MessageType = MessageType.BackendReply;
+                reply.Body = new BackendReply()
+                {
+                    Answer = SagaAnswer.HotelAndFlightFailure,
+                    OfferId = dbData.OfferId,
+                    TransactionId = reply.TransactionId
+                };
+                
+                await Publish.Writer.WriteAsync(reply, Token);
+                continue;
+            }
+            
+            // send it to the payment service
+            if (dbData.FullBookFlight != null && dbData.FullBookHotel != null &&
+                 dbData.FullBookFlight.Value && !dbData.FullBookHotel.Value ||
+                 dbData.TempBookFlight != null && dbData.TempBookHotel != null &&
+                 dbData.TempBookFlight.Value && !dbData.TempBookHotel.Value)
+            {
+                reply.State = SagaState.SagaFail;
+                reply.MessageType = MessageType.BackendReply;
+                reply.Body = new BackendReply()
+                {
+                    Answer = SagaAnswer.HotelFailure,
+                    OfferId = dbData.OfferId,
+                    TransactionId = reply.TransactionId
+                };
+                
+                await Publish.Writer.WriteAsync(reply, Token);
+                continue;
+            }
+            
+            // send it to the payment service
+            if (dbData.FullBookFlight != null && dbData.FullBookHotel != null &&
+                !dbData.FullBookFlight.Value && dbData.FullBookHotel.Value ||
+                dbData.TempBookFlight != null && dbData.TempBookHotel != null &&
+                !dbData.TempBookFlight.Value && dbData.TempBookHotel.Value)
+            {
+                reply.State = SagaState.SagaFail;
+                reply.MessageType = MessageType.BackendReply;
+                reply.Body = new BackendReply()
+                {
+                    Answer = SagaAnswer.FlightFailure,
+                    OfferId = dbData.OfferId,
+                    TransactionId = reply.TransactionId
+                };
+                
+                await Publish.Writer.WriteAsync(reply, Token);
+                continue;
+            }
         }
     }
 }

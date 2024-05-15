@@ -3,7 +3,7 @@
 Main repository of the saga process.
 Contains both orders microservice and orchestrator
 
-[Database, CQRS and Event Sourcing decribed bellow.](#db)
+[Database, CQRS and Event Sourcing described bellow.](#db)
 
 [SAGA transaction flow described bellow.](#saga)
 

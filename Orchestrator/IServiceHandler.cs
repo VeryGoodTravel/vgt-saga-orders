@@ -19,11 +19,6 @@ public interface IServiceHandler
     public Channel<Message> Publish { get; }
     
     /// <summary>
-    /// current request handled
-    /// </summary>
-    public Message Request { get; }
-    
-    /// <summary>
     /// Task handling requests of the service
     /// </summary>
     public Task RequestsTask { get; set; }

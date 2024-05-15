@@ -89,8 +89,8 @@ public class OrchPaymentHandler : IServiceHandler
 
         // send it to the payment service
         if (dbData.TempBookHotel != null && dbData.TempBookHotel.Value &&
-            Request.State == SagaState.FlightTimedAccept || dbData.TempBookHotel != null &&
-            dbData.TempBookHotel.Value && Request.State == SagaState.FlightTimedAccept)
+            Request.State == SagaState.FlightTimedAccept || dbData.TempBookFlight != null &&
+            dbData.TempBookFlight.Value && Request.State == SagaState.HotelTimedAccept)
         {
             var payment = new Message()
             {
@@ -134,7 +134,25 @@ public class OrchPaymentHandler : IServiceHandler
             if (dbData.TempBookHotel == null &&
                 Request.State is SagaState.HotelTimedAccept or SagaState.HotelTimedFail)
             {
-                
+                if (Request.State is SagaState.HotelTimedAccept)
+                {
+                    var answer = new HotelTempBooked()
+                    {
+                        TransactionId = Request.TransactionId,
+                        State = Request.State,
+                        Answer = Request.State == SagaState.HotelTimedAccept
+                    };
+                    await AppendToStream(answer);
+                }else if (Request.State is SagaState.FlightTimedFail)
+                {
+                    var answer = new HotelTempBooked()
+                    {
+                        TransactionId = Request.TransactionId,
+                        State = Request.State,
+                        Answer = Request.State == SagaState.HotelTimedRollback
+                    };
+                    await AppendToStream(answer);
+                }
             }
             return;
         }

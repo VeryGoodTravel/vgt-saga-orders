@@ -71,14 +71,12 @@ public class Orchestrator : IDisposable
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
 
-        _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest], _publish, _eventStore, _logger);
+        _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest], _publish, _eventStore, connStr, _logger);
         _orchBookHandler = new OrchBookHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
         _orchPaymentHandler = new OrchPaymentHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
-        // TODO: Add tasks for each service
 
         _queues = new RepliesQueueHandler(config1, _logger);
-            
-        // TODO: Probably add consumer later after all inits
+        
         _queues.AddRepliesConsumer(SagaRepliesEventHandler);
     }
 

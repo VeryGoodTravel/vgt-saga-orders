@@ -72,52 +72,30 @@ public class OrchBookHandler : IServiceHandler
                     continue;
                     break;
                 }
-                case SagaState.FlightTimedFail:
+                case SagaState.FlightFullFail or SagaState.FlightFullAccept:
                 {
-                    await DbLock.WaitAsync(Token);
-                    var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == Request.TransactionId, Token);
-                    DbLock.Release();
-                    
-                    Request = new Message()
+                    var answer = new FlightFullBooked()
                     {
                         TransactionId = Request.TransactionId,
-                        MessageId = Request.MessageId + 1,
-                        CreationDate = Request.CreationDate,
-                        MessageType = MessageType.HotelRequest,
-                        State = SagaState.HotelTimedRollback,
-                        Body = new HotelRequest()
-                        {
-                            Temporary = true,
-                            RoomType = dbData.RoomType,
-                            BookTo = dbData.BookTo,
-                            BookFrom = dbData.BookFrom,
-                            HotelName = dbData.HotelName,
-                        }
+                        State = Request.State,
+                        Answer = Request.State == SagaState.FlightFullAccept
                     };
+                    await AppendToStream(answer);
                     await Publish.Writer.WriteAsync(Request, Token);
+                    continue;
                     break;
                 }
-                case SagaState.HotelTimedFail:
+                case SagaState.HotelFullFail or SagaState.HotelFullAccept:
                 {
-                    await DbLock.WaitAsync(Token);
-                    var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == Request.TransactionId, Token);
-                    DbLock.Release();
-                    
-                    Request = new Message()
+                    var answer = new HotelFullBooked()
                     {
                         TransactionId = Request.TransactionId,
-                        MessageId = Request.MessageId + 1,
-                        CreationDate = Request.CreationDate,
-                        MessageType = MessageType.HotelRequest,
-                        State = SagaState.FlightTimedRollback,
-                        Body = new FlightRequest()
-                        {
-                            Temporary = true,
-                            BookTo = dbData.BookTo,
-                            BookFrom = dbData.BookFrom,
-                        }
+                        State = Request.State,
+                        Answer = Request.State == SagaState.HotelFullAccept
                     };
+                    await AppendToStream(answer);
                     await Publish.Writer.WriteAsync(Request, Token);
+                    continue;
                     break;
                 }
             }
@@ -226,12 +204,24 @@ public class OrchBookHandler : IServiceHandler
             if (dbData.TempBookFlight == null &&
                 Request.State is SagaState.FlightTimedAccept or SagaState.FlightTimedFail)
             {
-                
+                var @event = new FlightTempBooked()
+                {
+                    Answer = Request.State == SagaState.FlightTimedAccept,
+                    State = Request.State,
+                    TransactionId = Request.TransactionId
+                };
+                await AppendToStream(@event);
             }
             if (dbData.TempBookHotel == null &&
                 Request.State is SagaState.HotelTimedAccept or SagaState.HotelTimedFail)
             {
-                
+                var @event = new HotelTempBooked()
+                {
+                    Answer = Request.State == SagaState.HotelTimedAccept,
+                    State = Request.State,
+                    TransactionId = Request.TransactionId
+                };
+                await AppendToStream(@event);
             }
             return;
         }
