@@ -85,7 +85,7 @@ public class OrchOrderHandler : IServiceHandler
                             State = reply.State,
                             TransactionId = reply.TransactionId
                         },
-                        SagaState.FlightTimedRollback => new HotelTempRollback()
+                        SagaState.FlightTimedRollback => new FlightTempRollback()
                         {
                             Answer = reply.State == SagaState.FlightTimedAccept,
                             State = reply.State,
