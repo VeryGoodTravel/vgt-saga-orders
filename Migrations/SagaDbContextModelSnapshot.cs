@@ -79,6 +79,10 @@ namespace vgt_saga_orders.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TripTo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("TransactionId");
 
                     b.ToTable("Transactions");

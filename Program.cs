@@ -57,6 +57,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await using var scope = app.Services.CreateAsyncScope();
+{
+    await using var db = scope.ServiceProvider.GetService<SagaDbContext>();
+    {
+        logger.Info("CAN CONNECT {v}" ,db.Database.CanConnect());
+        await db.Database.MigrateAsync();
+    }
+}
+
+
 app.UseHttpsRedirection();
 
 Orchestrator? orchestrator = null;
