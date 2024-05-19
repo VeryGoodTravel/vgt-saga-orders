@@ -4,42 +4,6 @@
         <name>vgt-saga-orders</name>
     </assembly>
     <members>
-        <member name="T:vgt_saga_orders.Migrations.Initial">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:vgt_saga_orders.Migrations.FullService">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.FullService.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.FullService.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.FullService.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:vgt_saga_orders.Migrations.fullorchestratot">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
         <member name="T:vgt_saga_orders.Models.SagaDbContext">
             <inheritdoc />
         </member>
@@ -1282,14 +1246,6 @@
             <param name="log"></param>
         </member>
         <member name="M:vgt_saga_serialization.Utils.Deserialize(System.Byte[])">
-            <summary>
-            Deserializes JSON written in bytes from the RabbitMQ to the Saga Message struct
-            with targeted and appropriate MessageBody of the specified Type.
-            </summary>
-            <param name="body"> Json in bytes to deserialize </param>
-            <returns> null if invalid otherwise deserialized Saga Message</returns>
-        </member>
-        <member name="M:vgt_saga_serialization.Utils.DeserializeBackend(System.Byte[])">
             <summary>
             Deserializes JSON written in bytes from the RabbitMQ to the Saga Message struct
             with targeted and appropriate MessageBody of the specified Type.
