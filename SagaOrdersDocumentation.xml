@@ -28,6 +28,18 @@
         <member name="M:vgt_saga_orders.Migrations.FullService.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:vgt_saga_orders.Migrations.fullorchestratot">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.fullorchestratot.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:vgt_saga_orders.Models.SagaDbContext">
             <inheritdoc />
         </member>
