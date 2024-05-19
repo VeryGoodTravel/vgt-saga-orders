@@ -1,3 +1,4 @@
+using System.Text;
 using System.Threading.Channels;
 using Microsoft.EntityFrameworkCore;
 using NEventStore;
@@ -134,7 +135,7 @@ public class OrderService : IDisposable
         _logger.Debug("Received response | Tag: {tag}", ea.DeliveryTag);
         var body = ea.Body.ToArray();
 
-        var reply = _jsonUtils.DeserializeBackend(body);
+        var reply = JsonConvert.DeserializeObject<TransactionBody?>(Encoding.UTF8.GetString(body));
 
         if (reply == null) return;
 

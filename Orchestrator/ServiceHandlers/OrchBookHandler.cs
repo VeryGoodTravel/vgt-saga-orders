@@ -175,95 +175,95 @@ public class OrchBookHandler : IServiceHandler
         }
     }
     
-    private async Task HandleTempBookings(Transaction? dbData)
-    {
-        if (dbData == null) return;
-        if (Request.MessageType is not (MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightRequest or MessageType.FlightReply)) return;
-
-        // send it to the payment service
-        if (dbData.TempBookHotel != null && dbData.TempBookHotel.Value &&
-            Request.State == SagaState.FlightTimedAccept || dbData.TempBookHotel != null &&
-            dbData.TempBookHotel.Value && Request.State == SagaState.FlightTimedAccept)
-        {
-            var payment = new Message()
-            {
-                TransactionId = Request.TransactionId,
-                MessageId = Request.MessageId + 1,
-                CreationDate = Request.CreationDate,
-                MessageType = MessageType.PaymentRequest,
-                State = SagaState.TempBookAccepted,
-                Body = new PaymentRequest()
-            };
-            await Publish.Writer.WriteAsync(payment, Token);
-            return;
-        }
-
-        // update db only
-        if (dbData.TempBookFlight == null || dbData.TempBookHotel == null)
-        {
-            if (dbData.TempBookFlight == null &&
-                Request.State is SagaState.FlightTimedAccept or SagaState.FlightTimedFail)
-            {
-                var @event = new FlightTempBooked()
-                {
-                    Answer = Request.State == SagaState.FlightTimedAccept,
-                    State = Request.State,
-                    TransactionId = Request.TransactionId
-                };
-                await AppendToStream(@event);
-            }
-            if (dbData.TempBookHotel == null &&
-                Request.State is SagaState.HotelTimedAccept or SagaState.HotelTimedFail)
-            {
-                var @event = new HotelTempBooked()
-                {
-                    Answer = Request.State == SagaState.HotelTimedAccept,
-                    State = Request.State,
-                    TransactionId = Request.TransactionId
-                };
-                await AppendToStream(@event);
-            }
-            return;
-        }
-
-        // rollback
-        var hotel = new Message()
-        {
-            TransactionId = Request.TransactionId,
-            MessageId = Request.MessageId + 1,
-            CreationDate = Request.CreationDate,
-            MessageType = MessageType.HotelRequest,
-            State = SagaState.HotelTimedRollback,
-            Body = new HotelRequest()
-            {
-                Temporary = true,
-                RoomType = dbData.RoomType,
-                BookTo = dbData.BookTo,
-                BookFrom = dbData.BookFrom,
-                HotelName = dbData.HotelName,
-            }
-        };
-        var flight = new Message()
-        {
-            TransactionId = Request.TransactionId,
-            MessageId = Request.MessageId + 1,
-            CreationDate = Request.CreationDate,
-            MessageType = MessageType.FlightRequest,
-            State = SagaState.FlightTimedRollback,
-            Body = new FlightRequest()
-            {
-                Temporary = true,
-                BookFrom = dbData.BookFrom,
-                BookTo = dbData.BookTo,
-                CityFrom = dbData.TripFrom,
-                CityTo = dbData.TripTo,
-            }
-        };
-        
-
-        await Publish.Writer.WriteAsync(hotel, Token);
-        await Publish.Writer.WriteAsync(flight, Token);
-    }
+    // private async Task HandleTempBookings(Transaction? dbData)
+    // {
+    //     if (dbData == null) return;
+    //     if (Request.MessageType is not (MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightRequest or MessageType.FlightReply)) return;
+    //
+    //     // send it to the payment service
+    //     if (dbData.TempBookHotel != null && dbData.TempBookHotel.Value &&
+    //         Request.State == SagaState.FlightTimedAccept || dbData.TempBookHotel != null &&
+    //         dbData.TempBookHotel.Value && Request.State == SagaState.FlightTimedAccept)
+    //     {
+    //         var payment = new Message()
+    //         {
+    //             TransactionId = Request.TransactionId,
+    //             MessageId = Request.MessageId + 1,
+    //             CreationDate = Request.CreationDate,
+    //             MessageType = MessageType.PaymentRequest,
+    //             State = null,
+    //             Body = new PaymentRequest()
+    //         };
+    //         await Publish.Writer.WriteAsync(payment, Token);
+    //         return;
+    //     }
+    //
+    //     // update db only
+    //     if (dbData.TempBookFlight == null || dbData.TempBookHotel == null)
+    //     {
+    //         if (dbData.TempBookFlight == null &&
+    //             Request.State is SagaState.FlightTimedAccept or SagaState.FlightTimedFail)
+    //         {
+    //             var @event = new FlightTempBooked()
+    //             {
+    //                 Answer = Request.State == SagaState.FlightTimedAccept,
+    //                 State = Request.State,
+    //                 TransactionId = Request.TransactionId
+    //             };
+    //             await AppendToStream(@event);
+    //         }
+    //         if (dbData.TempBookHotel == null &&
+    //             Request.State is SagaState.HotelTimedAccept or SagaState.HotelTimedFail)
+    //         {
+    //             var @event = new HotelTempBooked()
+    //             {
+    //                 Answer = Request.State == SagaState.HotelTimedAccept,
+    //                 State = Request.State,
+    //                 TransactionId = Request.TransactionId
+    //             };
+    //             await AppendToStream(@event);
+    //         }
+    //         return;
+    //     }
+    //
+    //     // rollback
+    //     var hotel = new Message()
+    //     {
+    //         TransactionId = Request.TransactionId,
+    //         MessageId = Request.MessageId + 1,
+    //         CreationDate = Request.CreationDate,
+    //         MessageType = MessageType.HotelRequest,
+    //         State = SagaState.HotelTimedRollback,
+    //         Body = new HotelRequest()
+    //         {
+    //             Temporary = true,
+    //             RoomType = dbData.RoomType,
+    //             BookTo = dbData.BookTo,
+    //             BookFrom = dbData.BookFrom,
+    //             HotelName = dbData.HotelName,
+    //         }
+    //     };
+    //     var flight = new Message()
+    //     {
+    //         TransactionId = Request.TransactionId,
+    //         MessageId = Request.MessageId + 1,
+    //         CreationDate = Request.CreationDate,
+    //         MessageType = MessageType.FlightRequest,
+    //         State = SagaState.FlightTimedRollback,
+    //         Body = new FlightRequest()
+    //         {
+    //             Temporary = true,
+    //             BookFrom = dbData.BookFrom,
+    //             BookTo = dbData.BookTo,
+    //             CityFrom = dbData.TripFrom,
+    //             CityTo = dbData.TripTo,
+    //         }
+    //     };
+    //     
+    //
+    //     await Publish.Writer.WriteAsync(hotel, Token);
+    //     await Publish.Writer.WriteAsync(flight, Token);
+    // }
     
     private async Task AppendToStream(IEvent mess)
     {

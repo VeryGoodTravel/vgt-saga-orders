@@ -98,7 +98,7 @@ public class OrchPaymentHandler : IServiceHandler
                 MessageId = Request.MessageId + 1,
                 CreationDate = Request.CreationDate,
                 MessageType = MessageType.PaymentRequest,
-                State = SagaState.TempBookAccepted,
+                State = null,
                 Body = new PaymentRequest()
             };
             await Publish.Writer.WriteAsync(payment, Token);
