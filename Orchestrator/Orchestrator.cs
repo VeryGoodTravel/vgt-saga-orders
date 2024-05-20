@@ -1,8 +1,11 @@
+using System.Data.Common;
 using System.Threading.Channels;
 using NEventStore;
 using NEventStore.Serialization.Json;
 using NLog;
 using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Scaffolding.Internal;
+using Npgsql.Internal;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using vgt_saga_orders.Orchestrator.ServiceHandlers;
@@ -59,15 +62,23 @@ public class Orchestrator : IDisposable
 
         var connStr = SecretUtils.GetConnectionString(config1, "DB_NAME_SAGA", _logger);
 
+        //var db = new DbProviderFactory();
+        //NpgsqlFactory.Instance.CreateConnection();
+        ///DbProviderFactory factory =
+        //    DbProviderFactories.GetFactory("Npgsql");
+        
+
         _eventStore = Wireup.Init()
             .WithLoggerFactory(lf)
             .UsingInMemoryPersistence()
-            .UsingSqlPersistence(NpgsqlFactory.Instance, connStr)
+            //.UsingSqlPersistence(NpgsqlFactory.Instance,connStr)
             .InitializeStorageEngine()
             .UsingJsonSerialization()
             .Compress()
             .Build();
 
+        _logger.Debug("After eventstore");
+        
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
 

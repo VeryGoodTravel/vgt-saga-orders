@@ -49,9 +49,8 @@ public class OrchPaymentHandler : IServiceHandler
         EventStore = eventStore;
         Publish = publish;
         
-        var options = new DbContextOptionsBuilder<SagaDbContext>();
-        options.UseNpgsql(conn);
-        Db = new SagaDbContext(options.Options);
+        var options = new DbContextOptions<SagaDbContext>();
+        Db = new SagaDbContext(options, conn);
         
         _logger.Debug("Starting tasks handling the messages");
         RequestsTask = Task.Run(HandleRequests);

@@ -4,6 +4,18 @@
         <name>vgt-saga-orders</name>
     </assembly>
     <members>
+        <member name="T:vgt_saga_orders.Migrations.Initial">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:vgt_saga_orders.Models.SagaDbContext">
             <inheritdoc />
         </member>
@@ -13,6 +25,12 @@
             </summary>
         </member>
         <member name="M:vgt_saga_orders.Models.SagaDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{vgt_saga_orders.Models.SagaDbContext})">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Models.SagaDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{vgt_saga_orders.Models.SagaDbContext},System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_orders.Models.SagaDbContext.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)">
             <inheritdoc />
         </member>
         <member name="T:vgt_saga_orders.Models.Transaction">

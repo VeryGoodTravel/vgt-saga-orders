@@ -78,16 +78,32 @@ public class OrderQueueHandler : IDisposable
         _queueNames = GetQueuesFromConfig(config);
 
         _sagaReplies = _connection.CreateModel();
-        _sagaReplies.QueueDeclare(_queueNames[0]);
+        _sagaReplies.QueueDeclare(_queueNames[0],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _sagaOrder = _connection.CreateModel();
-        _sagaOrder.QueueDeclare(_queueNames[1]);
+        _sagaOrder.QueueDeclare(_queueNames[1],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _backendRequests = _connection.CreateModel();
-        _backendRequests.QueueDeclare(_queueNames[2]);
+        _backendRequests.QueueDeclare(_queueNames[2],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _backendReplies = _connection.CreateModel();
-        _backendReplies.ExchangeDeclare(_queueNames[3], ExchangeType.Fanout);
+        _backendReplies.ExchangeDeclare(_queueNames[3], 
+            ExchangeType.Fanout,
+            durable: true,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _logger.Debug("{p}Initialized RabbitMq queues", LoggerPrefix);
         _logger.Info("{p}Initialized RabbitMq", LoggerPrefix);

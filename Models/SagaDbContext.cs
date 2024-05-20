@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using vgt_saga_serialization;
 
 namespace vgt_saga_orders.Models;
@@ -19,13 +20,22 @@ public class SagaDbContext : DbContext
         : base(options)
     {
     }
-    // {
-    //     _connectionString = connectionString;
-    // }
-    //
-    // /// <inheritdoc />
-    // protected override void OnConfiguring(DbContextOptionsBuilder options)
-    //     => options.UseNpgsql(_connectionString);
+    /// <inheritdoc />
+    public SagaDbContext(DbContextOptions<SagaDbContext> options, string conn)
+        : base(options)
+    {
+        _connectionString = conn;
+    }
+    /// <inheritdoc />
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        if (!_connectionString.IsNullOrEmpty())
+        {
+            options.UseNpgsql(_connectionString);
+        }
+        
+        base.OnConfiguring(options);
+    }
 }
 
 /// <summary>

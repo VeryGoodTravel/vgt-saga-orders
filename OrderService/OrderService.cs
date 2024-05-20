@@ -56,9 +56,8 @@ public class OrderService : IDisposable
         _jsonUtils = new Utils(_logger);
         
         var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_SAGA", _logger);
-        var options = new DbContextOptionsBuilder<SagaDbContext>();
-        options.UseNpgsql(connStr);
-        var writeDb = new SagaDbContext(options.Options);
+        var options = new DbContextOptions<SagaDbContext>();
+        var writeDb = new SagaDbContext(options, connStr);
         
         _logger.Debug("Creating tasks message channels");
         _backendMessages = Channel.CreateUnbounded<TransactionBody>(new UnboundedChannelOptions()
