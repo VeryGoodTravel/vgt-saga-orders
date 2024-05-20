@@ -62,7 +62,7 @@ await using var scope = app.Services.CreateAsyncScope();
     await using var db = scope.ServiceProvider.GetService<SagaDbContext>();
     {
         logger.Info("CAN CONNECT {v}" ,db.Database.CanConnect());
-        db.Database.EnsureDeleted();
+        //db.Database.EnsureDeleted();
         await db.Database.MigrateAsync();
     }
 }
