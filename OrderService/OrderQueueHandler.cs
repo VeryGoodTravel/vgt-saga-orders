@@ -73,6 +73,7 @@ public class OrderQueueHandler : IDisposable
                 _logger.Error(
                     "{p}Couldn't connect to the RabbitMq server. Check connection string and/or connection {e}",
                     LoggerPrefix, e);
+                Task.Delay(100).Wait();
             }
         }
 
