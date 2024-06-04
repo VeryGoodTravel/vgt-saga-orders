@@ -1,7 +1,7 @@
 # vgt-saga-orders
 
 Main repository of the saga process.
-Contains both orders microservice and SAGA orchestrator
+Contains both orders microservice and SAGA orchestrator.
 
 [Database, CQRS and Event Sourcing described bellow.](#db)
 
