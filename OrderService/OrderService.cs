@@ -134,9 +134,16 @@ public class OrderService : IDisposable
         _logger.Debug("Received response | Tag: {tag}", ea.DeliveryTag);
         var body = ea.Body.ToArray();
 
-        var reply = JsonConvert.DeserializeObject<TransactionBody?>(Encoding.UTF8.GetString(body));
+        var str = Encoding.UTF8.GetString(body);
+        _logger.Info("Received response | {tag}", str);
+        
+        var reply = JsonConvert.DeserializeObject<TransactionBody?>(str);
 
-        if (reply == null) return;
+        if (reply == null)
+        {
+            _logger.Warn("Received response | nulll after conversion");
+            return;
+        }
 
         var message = reply.Value;
 
