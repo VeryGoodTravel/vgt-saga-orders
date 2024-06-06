@@ -180,7 +180,7 @@ public class OrderQueueHandler : IDisposable
     /// <param name="handler"> handler to assign to the consumer event </param>
     public void AddBackendConsumer(EventHandler<BasicDeliverEventArgs> handler)
     {
-        _backendConsumer = new EventingBasicConsumer(_sagaOrder);
+        _backendConsumer = new EventingBasicConsumer(_backendRequests);
         _logger.Debug("{p}Added Backend consumer", LoggerPrefix);
         _backendConsumer.Received += handler;
         _logger.Debug("{p}Added Backend event handler", LoggerPrefix);
