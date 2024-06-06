@@ -15,7 +15,7 @@ public record struct TransactionBody()
     /// <summary>
     /// ID of the offer as specified by the backend
     /// </summary>
-    public int OfferId { get; set; }
+    public string OfferId { get; set; }
     
     /// <summary>
     /// Date to book the hotel from (also the date of the flight)
