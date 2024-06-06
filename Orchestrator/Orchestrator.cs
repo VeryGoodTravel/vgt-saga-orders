@@ -98,23 +98,34 @@ public class Orchestrator : IDisposable
     /// </summary>
     private async Task RabbitPublisher()
     {
+        _logger.Debug("-----------------Rabbit publisher starting");
         while (await _publish.Reader.WaitToReadAsync(Token))
         {
+            _logger.Debug("-----------------Rabbit publisher message");
             var message = await _publish.Reader.ReadAsync(Token);
 
+            _logger.Debug("Recieved message {msg} {id}", message.MessageType.ToString(), message.TransactionId);
+            
             switch (message.MessageType)
             {
                 case MessageType.HotelRequest or MessageType.HotelReply:
                     _queues.PublishToHotel(_jsonUtils.Serialize(message));
+                    _logger.Debug("Sending to hotel {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
                     break;
                 case MessageType.FlightRequest or MessageType.FlightReply:
                     _queues.PublishToFlight(_jsonUtils.Serialize(message));
+                    _logger.Debug("Sending to flight {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
+
                     break;
                 case MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendRequest or MessageType.BackendReply:
                     _queues.PublishToOrders(_jsonUtils.Serialize(message));
+                    _logger.Debug("Sending to Orders {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
+
                     break;
                 case MessageType.PaymentRequest or MessageType.PaymentReply:
                     _queues.PublishToPayment(_jsonUtils.Serialize(message));
+                    _logger.Debug("Sending to Payment {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
+
                     break;
             }
         }
