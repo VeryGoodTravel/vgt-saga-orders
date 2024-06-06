@@ -165,20 +165,20 @@ public class OrderQueueHandler : IDisposable
         else _backendRequests.BasicReject(ea.DeliveryTag, false);
     }
 
-    /// <summary>
-    /// Create queue consumer and hook to the event specifying incoming requests.
-    /// </summary>
-    /// <param name="handler"> handler to assign to the consumer event </param>
-    public void AddRepliesConsumer(EventHandler<BasicDeliverEventArgs> handler)
-    {
-        _consumer = new EventingBasicConsumer(_sagaReplies);
-        _logger.Debug("{p}Added Replies consumer", LoggerPrefix);
-        _consumer.Received += handler;
-        _logger.Debug("{p}Added Replies event handler", LoggerPrefix);
-        _sagaReplies.BasicConsume(queue: _queueNames[0],
-            autoAck: false,
-            consumer: _consumer);
-    }
+    // /// <summary>
+    // /// Create queue consumer and hook to the event specifying incoming requests.
+    // /// </summary>
+    // /// <param name="handler"> handler to assign to the consumer event </param>
+    // public void AddRepliesConsumer(EventHandler<BasicDeliverEventArgs> handler)
+    // {
+    //     _consumer = new EventingBasicConsumer(_sagaReplies);
+    //     _logger.Debug("{p}Added Replies consumer", LoggerPrefix);
+    //     _consumer.Received += handler;
+    //     _logger.Debug("{p}Added Replies event handler", LoggerPrefix);
+    //     _sagaReplies.BasicConsume(queue: _queueNames[0],
+    //         autoAck: false,
+    //         consumer: _consumer);
+    // }
     
     /// <summary>
     /// Create queue consumer and hook to the event specifying incoming requests.

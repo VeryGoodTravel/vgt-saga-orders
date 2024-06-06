@@ -162,7 +162,7 @@ public class Orchestrator : IDisposable
             _ => false
         };
 
-        if (result) _logger.Debug("Replied routed successfuly to {type} handler", message.MessageType.ToString());
+        if (result) _logger.Debug("Replie routed successfuly to {type} handler", message.MessageType.ToString());
         else _logger.Warn("Something went wrong in routing to {type} handler", message.MessageType.ToString());
 
         _queues.PublishTagResponse(ea, result);

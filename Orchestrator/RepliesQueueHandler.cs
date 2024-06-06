@@ -132,7 +132,7 @@ public class RepliesQueueHandler : IDisposable
         _logger.Debug("{p}Response: {res}", LoggerPrefix, body);
         var bodyBytes = Encoding.UTF8.GetBytes(body);
         
-        _sagaReplies.BasicPublish(string.Empty, _queueNames[1], null, bodyBytes);
+        _sagaOrder.BasicPublish(string.Empty, _queueNames[1], null, bodyBytes);
     }
     
     /// <summary>
@@ -145,7 +145,7 @@ public class RepliesQueueHandler : IDisposable
         _logger.Debug("{p}Response: {res}", LoggerPrefix, body);
         var bodyBytes = Encoding.UTF8.GetBytes(body);
         
-        _sagaReplies.BasicPublish(string.Empty, _queueNames[2], null, bodyBytes);
+        _sagaPayment.BasicPublish(string.Empty, _queueNames[2], null, bodyBytes);
     }
     
     /// <summary>
@@ -158,7 +158,7 @@ public class RepliesQueueHandler : IDisposable
         _logger.Debug("{p}Response: {res}", LoggerPrefix, body);
         var bodyBytes = Encoding.UTF8.GetBytes(body);
         
-        _sagaReplies.BasicPublish(string.Empty, _queueNames[3], null, bodyBytes);
+        _sagaHotel.BasicPublish(string.Empty, _queueNames[3], null, bodyBytes);
     }
     
     /// <summary>
@@ -171,7 +171,7 @@ public class RepliesQueueHandler : IDisposable
         _logger.Debug("{p}Response: {res}", LoggerPrefix, body);
         var bodyBytes = Encoding.UTF8.GetBytes(body);
         
-        _sagaReplies.BasicPublish(string.Empty, _queueNames[4], null, bodyBytes);
+        _sagaFlight.BasicPublish(string.Empty, _queueNames[4], null, bodyBytes);
     }
     
     /// <summary>
