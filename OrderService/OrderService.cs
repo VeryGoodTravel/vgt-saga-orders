@@ -63,7 +63,7 @@ public class OrderService : IDisposable
 
         
         _orderHandler = new OrderHandler(writeDb, _logger);
-        Publisher = Task.Run(RabbitPublisher);
+        Publisher = Task.Run(() => RabbitPublisher());
 
         _queues = new OrderQueueHandler(_config, _logger);
         
@@ -76,7 +76,7 @@ public class OrderService : IDisposable
     /// </summary>
     private async Task RabbitPublisher()
     {
-        _logger.Debug("Rabbit publisher starting");
+        _logger.Debug("-----------------Rabbit publisher starting");
         while (await Publish.Reader.WaitToReadAsync(Token))
         {
             var message = await Publish.Reader.ReadAsync(Token);
