@@ -177,7 +177,7 @@ public class OrderQueueHandler : IDisposable
         _logger.Debug("{p}Added Replies event handler", LoggerPrefix);
         _sagaReplies.BasicConsume(queue: _queueNames[0],
             autoAck: false,
-            consumer: _backendConsumer);
+            consumer: _consumer);
     }
     
     /// <summary>
