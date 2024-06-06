@@ -31,6 +31,7 @@ public class OrderService : IDisposable
     private Channel<Message> OrchestratorMessages => _orderHandler.OrchestratorMessages;
     private Channel<Message> Publish => _orderHandler.Publish;
     private readonly OrderHandler _orderHandler;
+    private Task Publisher { get; set; }
     
     /// <summary>
     /// Allows tasks cancellation from the outside of the class
@@ -62,7 +63,7 @@ public class OrderService : IDisposable
 
         
         _orderHandler = new OrderHandler(writeDb, _logger);
-        Task.Run(RabbitPublisher);
+        Publisher = Task.Run(RabbitPublisher);
 
         _queues = new OrderQueueHandler(_config, _logger);
         
