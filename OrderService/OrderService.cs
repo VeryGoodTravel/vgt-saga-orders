@@ -66,6 +66,7 @@ public class OrderService : IDisposable
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         _logger.Debug("Tasks message channels created");
 
+        Task.Run(RabbitPublisher);
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         
@@ -86,12 +87,15 @@ public class OrderService : IDisposable
         {
             var message = await _publish.Reader.ReadAsync(Token);
 
+            _logger.Debug("Recieved message {msg} {id}", message.MessageType.ToString(), message.TransactionId);
             if (message.MessageType != MessageType.BackendReply && message.MessageType != MessageType.BackendRequest)
             {
+                _logger.Debug("Sending to the backend {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
                 _queues.PublishToBackend(JsonConvert.SerializeObject((BackendReply)message.Body));
             }
             else
             {
+                _logger.Debug("Sending to the orchestrator {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
                 _queues.PublishToOrchestrator( _jsonUtils.Serialize(message));
             }
         }
