@@ -223,10 +223,10 @@ public class RepliesQueueHandler : IDisposable
                 : config.GetValue<string?>("RABBIT_PAYMENT")!,
             string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_HOTEL"))
                 ? ThrowException<string>("RABBIT_HOTEL")
-                : config.GetValue<string?>("RABBIT_PAYMENT")!,
+                : config.GetValue<string?>("RABBIT_HOTEL")!,
             string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_FLIGHT"))
                 ? ThrowException<string>("RABBIT_FLIGHT")
-                : config.GetValue<string?>("RABBIT_PAYMENT")!
+                : config.GetValue<string?>("RABBIT_FLIGHT")!
         };
 
         return result;
