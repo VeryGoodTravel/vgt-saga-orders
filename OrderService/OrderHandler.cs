@@ -16,21 +16,21 @@ namespace vgt_saga_orders.OrderService;
 /// </summary>
 public class OrderHandler
 {
-    
+
     /// <summary>
     /// Messages from the backend to handle
     /// </summary>
-    public Channel<TransactionBody> BackendMessages { get; set; }
-    
+    public Channel<TransactionBody> BackendMessages;
+
     /// <summary>
     /// Messages from the orchestrator to handle
     /// </summary>
-    public Channel<Message> OrchestratorMessages { get; set; }
+    public Channel<Message> OrchestratorMessages;
 
     /// <summary>
     /// Messages that need to be sent out to the queues
     /// </summary>
-    public Channel<Message> Publish { get; set; }
+    public Channel<Message> Publish;
     
     /// <summary>
     /// current request handled
