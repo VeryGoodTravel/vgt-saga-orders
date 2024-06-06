@@ -169,8 +169,8 @@ public class OrchBookHandler : IServiceHandler
             //     };
             // }
             //
-            // await Publish.Writer.WriteAsync(hotel, Token);
-            // await Publish.Writer.WriteAsync(flight, Token);
+            // await publish.Writer.WriteAsync(hotel, Token);
+            // await publish.Writer.WriteAsync(flight, Token);
         }
     }
     
@@ -193,7 +193,7 @@ public class OrchBookHandler : IServiceHandler
     //             State = null,
     //             Body = new PaymentRequest()
     //         };
-    //         await Publish.Writer.WriteAsync(payment, Token);
+    //         await publish.Writer.WriteAsync(payment, Token);
     //         return;
     //     }
     //
@@ -260,8 +260,8 @@ public class OrchBookHandler : IServiceHandler
     //     };
     //     
     //
-    //     await Publish.Writer.WriteAsync(hotel, Token);
-    //     await Publish.Writer.WriteAsync(flight, Token);
+    //     await publish.Writer.WriteAsync(hotel, Token);
+    //     await publish.Writer.WriteAsync(flight, Token);
     // }
     
     private async Task AppendToStream(IEvent mess)

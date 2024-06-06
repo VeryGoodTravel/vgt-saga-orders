@@ -114,7 +114,7 @@
             Messages received from the specified service
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.IServiceHandler.Publish">
+        <member name="P:vgt_saga_orders.Orchestrator.IServiceHandler.publish">
             <summary>
             Messages that need to be sent out to the queues
             </summary>
@@ -215,25 +215,25 @@
         </member>
         <member name="M:vgt_saga_orders.Orchestrator.RepliesQueueHandler.PublishToOrders(System.String)">
             <summary>
-            Publish saga message to Orders queue
+            publish saga message to Orders queue
             </summary>
             <param name="body"> json body of the message to send </param>
         </member>
         <member name="M:vgt_saga_orders.Orchestrator.RepliesQueueHandler.PublishToPayment(System.String)">
             <summary>
-            Publish saga message to Payment queue
+            publish saga message to Payment queue
             </summary>
             <param name="body"> json body of the message to send </param>
         </member>
         <member name="M:vgt_saga_orders.Orchestrator.RepliesQueueHandler.PublishToHotel(System.String)">
             <summary>
-            Publish saga message to Hotel queue
+            publish saga message to Hotel queue
             </summary>
             <param name="body"> json body of the message to send </param>
         </member>
         <member name="M:vgt_saga_orders.Orchestrator.RepliesQueueHandler.PublishToFlight(System.String)">
             <summary>
-            Publish saga message to Flight queue
+            publish saga message to Flight queue
             </summary>
             <param name="body"> json body of the message to send </param>
         </member>
@@ -414,7 +414,7 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Publish">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Request">
@@ -443,7 +443,7 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.Publish">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.RequestsTask">
@@ -470,7 +470,7 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Publish">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Request">
@@ -580,7 +580,7 @@
             Messages from the orchestrator to handle
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.OrderService.OrderHandler.Publish">
+        <member name="P:vgt_saga_orders.OrderService.OrderHandler.publish">
             <summary>
             Messages that need to be sent out to the queues
             </summary>
@@ -658,13 +658,13 @@
         </member>
         <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.PublishToOrchestrator(System.String)">
             <summary>
-            Publish saga message to Orchestrator queue
+            publish saga message to Orchestrator queue
             </summary>
             <param name="body"> json body of the message to send </param>
         </member>
         <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.PublishToBackend(System.String)">
             <summary>
-            Publish the message to Backend exchange
+            publish the message to Backend exchange
             answers requests from the backend
             </summary>
             <param name="body"> json body of the message to send </param>

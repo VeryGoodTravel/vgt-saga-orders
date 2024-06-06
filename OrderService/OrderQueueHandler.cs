@@ -117,7 +117,7 @@ public class OrderQueueHandler : IDisposable
     }
 
     /// <summary>
-    /// Publish saga message to Orchestrator queue
+    /// publish saga message to Orchestrator queue
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
     public void PublishToOrchestrator(string body)
@@ -130,7 +130,7 @@ public class OrderQueueHandler : IDisposable
     }
     
     /// <summary>
-    /// Publish the message to Backend exchange
+    /// publish the message to Backend exchange
     /// answers requests from the backend
     /// </summary>
     /// <param name="body"> json body of the message to send </param>

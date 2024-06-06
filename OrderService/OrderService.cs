@@ -27,9 +27,9 @@ public class OrderService : IDisposable
     private readonly IStoreEvents _eventStore;
 
     private readonly List<MessageType> _keys = [MessageType.OrderReply, MessageType.OrderRequest];
-    private readonly Channel<TransactionBody> _backendMessages;
-    private readonly Channel<Message> _orchestratorMessages;
-    private readonly Channel<Message> _publish;
+    private Channel<TransactionBody> BackendMessages => _orderHandler.BackendMessages;
+    private Channel<Message> OrchestratorMessages => _orderHandler.OrchestratorMessages;
+    private Channel<Message> Publish => _orderHandler.Publish;
     private readonly OrderHandler _orderHandler;
     
     /// <summary>
@@ -59,19 +59,10 @@ public class OrderService : IDisposable
         var options = new DbContextOptions<SagaDbContext>();
         var writeDb = new SagaDbContext(options, connStr);
         
-        _logger.Debug("Creating tasks message channels");
-        _backendMessages = Channel.CreateUnbounded<TransactionBody>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
-        _orchestratorMessages = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
-        _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
-        _logger.Debug("Tasks message channels created");
-
-        Task.Run(RabbitPublisher);
 
         
-        _orderHandler = new OrderHandler(_orchestratorMessages, _backendMessages, _publish, writeDb, _logger);
+        _orderHandler = new OrderHandler(writeDb, _logger);
+        Task.Run(RabbitPublisher);
 
         _queues = new OrderQueueHandler(_config, _logger);
         
@@ -85,9 +76,9 @@ public class OrderService : IDisposable
     private async Task RabbitPublisher()
     {
         _logger.Debug("Rabbit publisher starting");
-        while (await _publish.Reader.WaitToReadAsync(Token))
+        while (await Publish.Reader.WaitToReadAsync(Token))
         {
-            var message = await _publish.Reader.ReadAsync(Token);
+            var message = await Publish.Reader.ReadAsync(Token);
 
             _logger.Debug("Recieved message {msg} {id}", message.MessageType.ToString(), message.TransactionId);
             if (message.MessageType != MessageType.BackendReply && message.MessageType != MessageType.BackendRequest)
@@ -121,7 +112,7 @@ public class OrderService : IDisposable
         var message = reply.Value;
 
         // send message reply to the appropriate task
-        var result = _orchestratorMessages.Writer.TryWrite(message);
+        var result = OrchestratorMessages.Writer.TryWrite(message);
         
         if (result) _logger.Debug("Replied routed successfuly to {type} handler", message.MessageType.ToString());
         else _logger.Warn("Something went wrong in routing to {type} handler", message.MessageType.ToString());
@@ -154,7 +145,7 @@ public class OrderService : IDisposable
         var message = reply.Value;
 
         // send message reply to the appropriate task
-        var result = _backendMessages.Writer.TryWrite(message);
+        var result = BackendMessages.Writer.TryWrite(message);
         
         if (result) _logger.Debug("Replied routed successfuly to backend handler");
         else _logger.Warn("Something went wrong in routing to backend handler");

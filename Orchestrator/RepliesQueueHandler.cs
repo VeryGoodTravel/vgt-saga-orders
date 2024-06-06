@@ -123,7 +123,7 @@ public class RepliesQueueHandler : IDisposable
     }
     
     /// <summary>
-    /// Publish saga message to Orders queue
+    /// publish saga message to Orders queue
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
     public void PublishToOrders(string body)
@@ -136,7 +136,7 @@ public class RepliesQueueHandler : IDisposable
     }
     
     /// <summary>
-    /// Publish saga message to Payment queue
+    /// publish saga message to Payment queue
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
     public void PublishToPayment(string body)
@@ -149,7 +149,7 @@ public class RepliesQueueHandler : IDisposable
     }
     
     /// <summary>
-    /// Publish saga message to Hotel queue
+    /// publish saga message to Hotel queue
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
     public void PublishToHotel(string body)
@@ -162,7 +162,7 @@ public class RepliesQueueHandler : IDisposable
     }
     
     /// <summary>
-    /// Publish saga message to Flight queue
+    /// publish saga message to Flight queue
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
     public void PublishToFlight(string body)

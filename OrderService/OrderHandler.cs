@@ -20,17 +20,17 @@ public class OrderHandler
     /// <summary>
     /// Messages from the backend to handle
     /// </summary>
-    public Channel<TransactionBody> BackendMessages { get; }
+    public Channel<TransactionBody> BackendMessages { get; set; }
     
     /// <summary>
     /// Messages from the orchestrator to handle
     /// </summary>
-    public Channel<Message> OrchestratorMessages { get; }
-    
+    public Channel<Message> OrchestratorMessages { get; set; }
+
     /// <summary>
     /// Messages that need to be sent out to the queues
     /// </summary>
-    public Channel<Message> Publish { get; }
+    public Channel<Message> Publish { get; set; }
     
     /// <summary>
     /// current request handled
@@ -70,12 +70,17 @@ public class OrderHandler
     /// <param name="publish"> Queue with messages that need to be published to RabbitMQ </param>
     /// <param name="db"> Database used </param>
     /// <param name="log"> logger to log to </param>
-    public OrderHandler(Channel<Message> replies, Channel<TransactionBody> requests, Channel<Message> publish, SagaDbContext db, Logger log)
+    public OrderHandler(SagaDbContext db, Logger log)
     {
         _logger = log;
-        OrchestratorMessages = replies;
-        BackendMessages = requests;
-        Publish = publish;
+        
+        OrchestratorMessages = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        BackendMessages = Channel.CreateUnbounded<TransactionBody>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        Publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        
         _db = db;
 
         _logger.Debug("Starting tasks handling the messages");
@@ -129,7 +134,7 @@ public class OrderHandler
                     TemporaryDateTime = DateTime.MinValue
                 }
             };
-            await Publish.Writer.WriteAsync(sagaHotel, Token);
+            await Publish.Writer.WriteAsync(sagaHotel);
             _logger.Debug("Sent a saga message concerning hotel to the orchestrator");
             
             var sagaFlight = new Message()
@@ -150,7 +155,7 @@ public class OrderHandler
                     PassangerCount = trans.AdultCount + trans.LesserChildren + trans.MidChildren + trans.OldChildren
                 }
             };
-            await Publish.Writer.WriteAsync(sagaFlight, Token);
+            await Publish.Writer.WriteAsync(sagaFlight);
             _logger.Debug("Sent a saga message concerning flight to the orchestrator");
         }
     }
