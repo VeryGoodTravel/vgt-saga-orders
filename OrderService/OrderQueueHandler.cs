@@ -101,6 +101,9 @@ public class OrderQueueHandler : IDisposable
             exclusive: false,
             autoDelete: false,
             arguments: new Dictionary<string, object>());
+        
+        _logger.Debug("{p}Initialized RabbitMq backend queue {q}", LoggerPrefix, _backendRequests.CurrentQueue);
+        
 
         _backendReplies = _connection.CreateModel();
         _backendReplies.ExchangeDeclare(_queueNames[3], 
@@ -168,10 +171,13 @@ public class OrderQueueHandler : IDisposable
     /// <param name="handler"> handler to assign to the consumer event </param>
     public void AddRepliesConsumer(EventHandler<BasicDeliverEventArgs> handler)
     {
-        _consumer = new EventingBasicConsumer(_sagaOrder);
+        _consumer = new EventingBasicConsumer(_sagaReplies);
         _logger.Debug("{p}Added Replies consumer", LoggerPrefix);
         _consumer.Received += handler;
         _logger.Debug("{p}Added Replies event handler", LoggerPrefix);
+        _sagaReplies.BasicConsume(queue: _queueNames[0],
+            autoAck: false,
+            consumer: _backendConsumer);
     }
     
     /// <summary>
@@ -184,6 +190,9 @@ public class OrderQueueHandler : IDisposable
         _logger.Debug("{p}Added Backend consumer", LoggerPrefix);
         _backendConsumer.Received += handler;
         _logger.Debug("{p}Added Backend event handler", LoggerPrefix);
+        _backendRequests.BasicConsume(queue: _queueNames[2],
+            autoAck: false,
+            consumer: _backendConsumer);
     }
 
     /// <summary>
