@@ -134,6 +134,7 @@ public class OrderHandler
                     TemporaryDateTime = DateTime.MinValue
                 }
             };
+            await Publish.Writer.WaitToWriteAsync();
             await Publish.Writer.WriteAsync(sagaHotel);
             _logger.Debug("Sent a saga message concerning hotel to the orchestrator");
             
@@ -155,6 +156,7 @@ public class OrderHandler
                     PassangerCount = trans.AdultCount + trans.LesserChildren + trans.MidChildren + trans.OldChildren
                 }
             };
+            await Publish.Writer.WaitToWriteAsync();
             await Publish.Writer.WriteAsync(sagaFlight);
             _logger.Debug("Sent a saga message concerning flight to the orchestrator");
         }
