@@ -84,7 +84,7 @@ public class Orchestrator : IDisposable
 
         _orchOrderHandler = new OrchOrderHandler(_repliesChannels[MessageType.OrderRequest], _publish, _eventStore, connStr, _logger);
         _orchBookHandler = new OrchBookHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
-        _orchPaymentHandler = new OrchPaymentHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
+        _orchPaymentHandler = new OrchPaymentHandler(_repliesChannels[MessageType.PaymentRequest], _publish, _eventStore, connStr, _logger);
 
         Task.Run(RabbitPublisher);
         
