@@ -135,7 +135,7 @@ public class OrderHandler
                 }
             };
             await Publish.Writer.WaitToWriteAsync();
-            await Publish.Writer.WriteAsync(sagaHotel);
+            if(!Publish.Writer.TryWrite(sagaHotel)) {_logger.Debug("not working channel hotel");}
             _logger.Debug("Sent a saga message concerning hotel to the orchestrator");
             
             var sagaFlight = new Message()
@@ -157,7 +157,7 @@ public class OrderHandler
                 }
             };
             await Publish.Writer.WaitToWriteAsync();
-            await Publish.Writer.WriteAsync(sagaFlight);
+            if(!Publish.Writer.TryWrite(sagaFlight)) {_logger.Debug("not working channel flight");}
             _logger.Debug("Sent a saga message concerning flight to the orchestrator");
         }
     }

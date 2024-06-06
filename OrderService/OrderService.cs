@@ -79,6 +79,7 @@ public class OrderService : IDisposable
         _logger.Debug("-----------------Rabbit publisher starting");
         while (await Publish.Reader.WaitToReadAsync(Token))
         {
+            _logger.Debug("-----------------Rabbit publisher message");
             var message = await Publish.Reader.ReadAsync(Token);
 
             _logger.Debug("Recieved message {msg} {id}", message.MessageType.ToString(), message.TransactionId);
