@@ -79,7 +79,7 @@ public class OrderHandler
         BackendMessages = Channel.CreateUnbounded<TransactionBody>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         Publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+            { SingleReader = true, SingleWriter = false, AllowSynchronousContinuations = true });
         
         _db = db;
 
