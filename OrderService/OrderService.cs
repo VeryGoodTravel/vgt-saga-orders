@@ -84,6 +84,7 @@ public class OrderService : IDisposable
     /// </summary>
     private async Task RabbitPublisher()
     {
+        _logger.Debug("Rabbit publisher starting");
         while (await _publish.Reader.WaitToReadAsync(Token))
         {
             var message = await _publish.Reader.ReadAsync(Token);

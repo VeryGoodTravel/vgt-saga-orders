@@ -86,6 +86,8 @@ public class Orchestrator : IDisposable
         _orchBookHandler = new OrchBookHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
         _orchPaymentHandler = new OrchPaymentHandler(_repliesChannels[MessageType.HotelRequest], _publish, _eventStore, connStr, _logger);
 
+        Task.Run(RabbitPublisher);
+        
         _queues = new RepliesQueueHandler(config1, _logger);
         
         _queues.AddRepliesConsumer(SagaRepliesEventHandler);
@@ -128,12 +130,14 @@ public class Orchestrator : IDisposable
     {
         _logger.Debug("Received response | Tag: {tag}", ea.DeliveryTag);
         var body = ea.Body.ToArray();
-
+        
         var reply = _jsonUtils.Deserialize(body);
 
         if (reply == null) return;
 
         var message = reply.Value;
+        
+        _logger.Debug("Received response parsed | {tag} | {s} | {a}", message.TransactionId, message.MessageType, message.State);
 
         // send message reply to the appropriate task
         var result = message.MessageType switch
