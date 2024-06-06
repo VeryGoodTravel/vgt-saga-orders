@@ -83,7 +83,7 @@ public class OrderService : IDisposable
             var message = await Publish.Reader.ReadAsync(Token);
 
             _logger.Debug("Recieved message {msg} {id}", message.MessageType.ToString(), message.TransactionId);
-            if (message.MessageType != MessageType.BackendReply && message.MessageType != MessageType.BackendRequest)
+            if (message.MessageType is MessageType.BackendReply or MessageType.BackendRequest)
             {
                 _logger.Debug("Sending to the backend {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
                 _queues.PublishToBackend(JsonConvert.SerializeObject((BackendReply)message.Body));
