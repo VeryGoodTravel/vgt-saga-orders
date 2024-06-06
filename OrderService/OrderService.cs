@@ -64,11 +64,12 @@ public class OrderService : IDisposable
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         _orchestratorMessages = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
+            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
         _logger.Debug("Tasks message channels created");
 
         Task.Run(RabbitPublisher);
-        _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+
         
         _orderHandler = new OrderHandler(_orchestratorMessages, _backendMessages, _publish, writeDb, _logger);
 
