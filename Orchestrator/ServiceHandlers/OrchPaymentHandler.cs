@@ -72,9 +72,9 @@ public class OrchPaymentHandler : IServiceHandler
             await AppendToStream(answer);
 
             _logger.Debug("After event sourcing");
-            
+            _logger.Debug("Trying to get transaction with Guuid {gh}", Request.TransactionId);
             await DbLock.WaitAsync(Token);
-            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId.Equals(Request.TransactionId), Token);
+            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId.ToString().Equals(Request.TransactionId.ToString()));
             DbLock.Release();
             _logger.Debug($"Db data {dbData}");
             
