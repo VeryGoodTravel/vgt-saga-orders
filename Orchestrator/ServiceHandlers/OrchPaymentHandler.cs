@@ -18,7 +18,6 @@ public class OrchPaymentHandler : IServiceHandler
     /// <inheritdoc />
     public Channel<Message> Publish { get; }
     /// <inheritdoc />
-    public Message Request { get; set; }
     
     /// <inheritdoc />
     public Task RequestsTask { get; set; }
@@ -63,35 +62,49 @@ public class OrchPaymentHandler : IServiceHandler
         {
             var req = await Messages.Reader.ReadAsync(Token);
             
-            var answer = new PaymentAnswer()
-            {
-                TransactionId = Request.TransactionId,
-                State = Request.State,
-                Answer = Request.State == SagaState.PaymentAccept
-            };
-            await AppendToStream(answer);
-
-            _logger.Debug("After event sourcing");
-            _logger.Debug("Trying to get transaction with Guuid {gh}", Request.TransactionId);
+            _logger.Debug("Trying to get transaction with Guuid {gh}", req.TransactionId);
             await DbLock.WaitAsync(Token);
-            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId.ToString().Equals(Request.TransactionId.ToString()));
+            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == req.TransactionId);
             DbLock.Release();
             _logger.Debug($"Db data {dbData}");
             
-            await HandlePayment(dbData);
+            await HandlePayment(dbData, req);
             _logger.Debug("After payments");
-            await HandleTempBookings(dbData);
+            await HandleTempBookings(dbData, req);
             _logger.Debug("After temp booking");
 
         }
     }
     
-    private async Task HandleTempBookings(Transaction? dbData)
+    private async Task HandleTempBookings(Transaction? dbData, Message Request)
     {
         if (dbData == null) return;
         if (Request.State is not (SagaState.HotelTimedAccept or SagaState.HotelTimedFail or SagaState.HotelTimedRollback 
             or SagaState.FlightTimedAccept or SagaState.FlightTimedFail or SagaState.FlightTimedRollback)) return;
 
+        if (Request.State is SagaState.HotelTimedAccept or SagaState.HotelTimedFail or SagaState.HotelTimedRollback)
+        {
+            var even = new HotelTempBooked()
+            {
+                TransactionId = Request.TransactionId,
+                State = Request.State,
+                Answer = Request.State == SagaState.HotelTimedAccept
+            };
+            await AppendToStream(even);
+        }
+        else
+        {
+            var even = new FlightTempBooked()
+            {
+                TransactionId = Request.TransactionId,
+                State = Request.State,
+                Answer = Request.State == SagaState.FlightTimedAccept
+            };
+            await AppendToStream(even);
+        }
+
+        _logger.Debug("After event sourcing");
+        
         // send it to the payment service
         if (dbData.TempBookHotel != null && dbData.TempBookHotel.Value &&
             Request.State == SagaState.FlightTimedAccept || dbData.TempBookFlight != null &&
@@ -212,12 +225,22 @@ public class OrchPaymentHandler : IServiceHandler
         await Publish.Writer.WriteAsync(flight, Token);
     }
 
-    private async Task HandlePayment(Transaction? dbData)
+    private async Task HandlePayment(Transaction? dbData, Message Request)
     {
         if (dbData == null) return;
         if (Request.State is not (SagaState.PaymentAccept or SagaState.PaymentFailed)) return;
         Message hotel;
         Message flight;
+        
+        var answer = new PaymentAnswer()
+        {
+            TransactionId = Request.TransactionId,
+            State = Request.State,
+            Answer = Request.State == SagaState.PaymentAccept
+        };
+        await AppendToStream(answer);
+
+        _logger.Debug("After event sourcing");
 
         if (Request.State == SagaState.PaymentAccept)
         {
@@ -295,7 +318,16 @@ public class OrchPaymentHandler : IServiceHandler
         }
 
         dbData.State = mess.State.Value;
-        dbData.Payment = mess.Answer;
+        if (mess is PaymentAnswer)
+        {
+            dbData.Payment = mess.Answer;
+        }else if (mess is HotelTempBooked)
+        {
+            dbData.TempBookHotel = mess.Answer;
+        }else if (mess is FlightTempBooked)
+        {
+            dbData.TempBookFlight = mess.Answer;
+        }
         await Db.SaveChangesAsync(Token);
         DbLock.Release();
     }
