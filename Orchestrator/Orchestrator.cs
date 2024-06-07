@@ -109,21 +109,29 @@ public class Orchestrator : IDisposable
             switch (message.MessageType)
             {
                 case MessageType.HotelRequest or MessageType.HotelReply:
-                    _queues.PublishToHotel(_jsonUtils.Serialize(message));
+                    var ser = _jsonUtils.Serialize(message);
+                    _logger.Debug("Serialized to hotel {body}", ser);
+                    _queues.PublishToHotel(ser);
                     _logger.Debug("Sending to hotel {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
                     break;
                 case MessageType.FlightRequest or MessageType.FlightReply:
-                    _queues.PublishToFlight(_jsonUtils.Serialize(message));
+                    var ser2 = _jsonUtils.Serialize(message);
+                    _logger.Debug("Serialized to flight {body}", ser2);
+                    _queues.PublishToFlight(ser2);
                     _logger.Debug("Sending to flight {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
 
                     break;
                 case MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendRequest or MessageType.BackendReply:
-                    _queues.PublishToOrders(_jsonUtils.Serialize(message));
+                    var ser3 = _jsonUtils.Serialize(message);
+                    _logger.Debug("Serialized to Orders {body}", ser3);
+                    _queues.PublishToOrders(ser3);
                     _logger.Debug("Sending to Orders {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
 
                     break;
                 case MessageType.PaymentRequest or MessageType.PaymentReply:
-                    _queues.PublishToPayment(_jsonUtils.Serialize(message));
+                    var ser4 = _jsonUtils.Serialize(message);
+                    _logger.Debug("Serialized to payment {body}", ser4);
+                    _queues.PublishToPayment(ser4);
                     _logger.Debug("Sending to Payment {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
 
                     break;

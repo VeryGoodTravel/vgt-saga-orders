@@ -63,14 +63,14 @@ public class OrchBookHandler : IServiceHandler
         {
             Request = await Messages.Reader.ReadAsync(Token);
 
-            _logger.Debug("Recieved message --- {m} {ty} {st}", Request.TransactionId, Request.MessageType, Request.State);
+            _logger.Debug("Recieved message --- {m} {ty} {st} {body}", Request.TransactionId, Request.MessageType, Request.State, Request.Body);
             
             switch (Request.State)
             {
                 case SagaState.Begin:
                 {
                     await Publish.Writer.WriteAsync(Request, Token);
-                    _logger.Debug("Sent to Publish --- {m} {ty} {st}", Request.TransactionId, Request.MessageType, Request.State);
+                    _logger.Debug("Sent to Publish --- {m} {ty} {st} {body}", Request.TransactionId, Request.MessageType, Request.State, Request.Body);
                     continue;
                     break;
                 }
