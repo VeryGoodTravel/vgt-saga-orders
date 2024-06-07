@@ -74,7 +74,7 @@ public class OrchPaymentHandler : IServiceHandler
             _logger.Debug("After event sourcing");
             
             await DbLock.WaitAsync(Token);
-            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == Request.TransactionId, Token);
+            var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId.Equals(Request.TransactionId), Token);
             DbLock.Release();
             _logger.Debug($"Db data {dbData}");
             
