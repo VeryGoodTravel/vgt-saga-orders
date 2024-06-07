@@ -84,7 +84,8 @@ public class OrchPaymentHandler : IServiceHandler
     private async Task HandleTempBookings(Transaction? dbData)
     {
         if (dbData == null) return;
-        if (Request.MessageType is not (MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightRequest or MessageType.FlightReply)) return;
+        if (Request.State is not (SagaState.HotelTimedAccept or SagaState.HotelTimedFail or SagaState.HotelTimedRollback 
+            or SagaState.FlightTimedAccept or SagaState.FlightTimedFail or SagaState.FlightTimedRollback)) return;
 
         // send it to the payment service
         if (dbData.TempBookHotel != null && dbData.TempBookHotel.Value &&
