@@ -199,7 +199,7 @@ public class OrchPaymentHandler : IServiceHandler
     private async Task HandlePayment(Transaction? dbData)
     {
         if (dbData == null) return;
-        if (Request.MessageType is not (MessageType.PaymentRequest or MessageType.PaymentReply)) return;
+        if (Request.State is not (SagaState.PaymentAccept or SagaState.PaymentFailed)) return;
         Message hotel;
         Message flight;
 
