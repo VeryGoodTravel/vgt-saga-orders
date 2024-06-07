@@ -71,12 +71,17 @@ public class OrchPaymentHandler : IServiceHandler
             };
             await AppendToStream(answer);
 
+            _logger.Debug("After event sourcing");
+            
             await DbLock.WaitAsync(Token);
             var dbData = await Db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == Request.TransactionId, Token);
             DbLock.Release();
+            _logger.Debug($"Db data {dbData}");
             
             await HandlePayment(dbData);
+            _logger.Debug("After payments");
             await HandleTempBookings(dbData);
+            _logger.Debug("After temp booking");
 
         }
     }
@@ -92,6 +97,8 @@ public class OrchPaymentHandler : IServiceHandler
             Request.State == SagaState.FlightTimedAccept || dbData.TempBookFlight != null &&
             dbData.TempBookFlight.Value && Request.State == SagaState.HotelTimedAccept)
         {
+            
+            _logger.Debug("Finished temp bookings");
             var payment = new Message()
             {
                 TransactionId = Request.TransactionId,
@@ -101,10 +108,12 @@ public class OrchPaymentHandler : IServiceHandler
                 State = null,
                 Body = new PaymentRequest()
             };
+            _logger.Debug("Publishing temp bookimgs");
             await Publish.Writer.WriteAsync(payment, Token);
             return;
         }
 
+        _logger.Debug("Not finished yet");
         // update db only
         if (dbData.TempBookFlight == null || dbData.TempBookHotel == null)
         {
@@ -119,6 +128,7 @@ public class OrchPaymentHandler : IServiceHandler
                         State = Request.State,
                         Answer = Request.State == SagaState.FlightTimedAccept
                     };
+                    _logger.Debug("Adding Flight accept");
                     await AppendToStream(answer);
                 }else if (Request.State is SagaState.FlightTimedFail)
                 {
@@ -128,6 +138,7 @@ public class OrchPaymentHandler : IServiceHandler
                         State = Request.State,
                         Answer = Request.State == SagaState.FlightTimedRollback
                     };
+                    _logger.Debug("Adding Flight declines");
                     await AppendToStream(answer);
                 }
             }
@@ -142,6 +153,7 @@ public class OrchPaymentHandler : IServiceHandler
                         State = Request.State,
                         Answer = Request.State == SagaState.HotelTimedAccept
                     };
+                    _logger.Debug("Adding Hotel accept");
                     await AppendToStream(answer);
                 }else if (Request.State is SagaState.FlightTimedFail)
                 {
@@ -151,13 +163,16 @@ public class OrchPaymentHandler : IServiceHandler
                         State = Request.State,
                         Answer = Request.State == SagaState.HotelTimedRollback
                     };
+                    _logger.Debug("Adding Hotel accept");
                     await AppendToStream(answer);
                 }
             }
             return;
         }
 
+        _logger.Debug("Rollbacks");
         // rollback
+        _logger.Debug("Rollback to Milano");
         var hotel = new Message()
         {
             TransactionId = Request.TransactionId,
@@ -174,6 +189,7 @@ public class OrchPaymentHandler : IServiceHandler
                 HotelName = dbData.HotelName,
             }
         };
+        _logger.Debug("Rollback to Milano");
         var flight = new Message()
         {
             TransactionId = Request.TransactionId,
