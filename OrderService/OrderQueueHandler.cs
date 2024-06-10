@@ -205,11 +205,11 @@ public class OrderQueueHandler : IDisposable
     /// <param name="handler"> handler to assign to the consumer event </param>
     public void AddSagaConsumer(EventHandler<BasicDeliverEventArgs> handler)
     {
-        _consumer = new EventingBasicConsumer(_sagaReplies);
+        _consumer = new EventingBasicConsumer(_sagaOrder);
         _logger.Debug("{p}Added saga consumer", LoggerPrefix);
         _consumer.Received += handler;
         _logger.Debug("{p}Added saga event handler", LoggerPrefix);
-        _sagaReplies.BasicConsume(queue: _queueNames[2],
+        _sagaOrder.BasicConsume(queue: _queueNames[1],
             autoAck: false,
             consumer: _consumer);
     }
