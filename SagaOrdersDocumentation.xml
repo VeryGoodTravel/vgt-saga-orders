@@ -114,7 +114,7 @@
             Messages received from the specified service
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.IServiceHandler.publish">
+        <member name="P:vgt_saga_orders.Orchestrator.IServiceHandler.Publish">
             <summary>
             Messages that need to be sent out to the queues
             </summary>
@@ -414,7 +414,7 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.publish">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchBookHandler.Request">
@@ -443,7 +443,7 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.publish">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.Publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchOrderHandler.RequestsTask">
@@ -470,13 +470,11 @@
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Messages">
             <inheritdoc />
         </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.publish">
-            <inheritdoc />
-        </member>
-        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Request">
+        <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Publish">
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.RequestsTask">
+            <inheritdoc />
             <inheritdoc />
         </member>
         <member name="P:vgt_saga_orders.Orchestrator.ServiceHandlers.OrchPaymentHandler.Token">
@@ -570,17 +568,17 @@
             Handles the data in messages
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.OrderService.OrderHandler.BackendMessages">
+        <member name="F:vgt_saga_orders.OrderService.OrderHandler.BackendMessages">
             <summary>
             Messages from the backend to handle
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.OrderService.OrderHandler.OrchestratorMessages">
+        <member name="F:vgt_saga_orders.OrderService.OrderHandler.OrchestratorMessages">
             <summary>
             Messages from the orchestrator to handle
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.OrderService.OrderHandler.publish">
+        <member name="F:vgt_saga_orders.OrderService.OrderHandler.Publish">
             <summary>
             Messages that need to be sent out to the queues
             </summary>
@@ -610,7 +608,7 @@
             Token allowing tasks cancellation from the outside of the class
             </summary>
         </member>
-        <member name="M:vgt_saga_orders.OrderService.OrderHandler.#ctor(System.Threading.Channels.Channel{vgt_saga_serialization.Message},System.Threading.Channels.Channel{vgt_saga_orders.OrderService.TransactionBody},System.Threading.Channels.Channel{vgt_saga_serialization.Message},vgt_saga_orders.Models.SagaDbContext,NLog.Logger)">
+        <member name="M:vgt_saga_orders.OrderService.OrderHandler.#ctor(vgt_saga_orders.Models.SagaDbContext,NLog.Logger)">
             <summary>
             Default constructor of the order handler class
             that handles data and prepares messages concerning saga orders beginning, end and failure
@@ -682,12 +680,6 @@
             </summary>
             <param name="ea"> tag to answer </param>
             <param name="state"> ack/reject </param>
-        </member>
-        <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.AddRepliesConsumer(System.EventHandler{RabbitMQ.Client.Events.BasicDeliverEventArgs})">
-            <summary>
-            Create queue consumer and hook to the event specifying incoming requests.
-            </summary>
-            <param name="handler"> handler to assign to the consumer event </param>
         </member>
         <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.AddBackendConsumer(System.EventHandler{RabbitMQ.Client.Events.BasicDeliverEventArgs})">
             <summary>
@@ -798,10 +790,15 @@
             <returns></returns>
             <exception cref="T:System.ArgumentException"> Which variable is missing </exception>
         </member>
-        <member name="T:vgt_saga_serialization.IMessageBody">
+        <member name="T:vgt_saga_serialization.MessageBody">
             <summary>
             Message body of the request or reply
             contains data needed by the microservice for the transaction
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBody.MessageType">
+            <summary>
+            A message type used by producers/consumers to identify events and commands
             </summary>
         </member>
         <member name="T:vgt_saga_serialization.Message">
@@ -1021,18 +1018,7 @@
             contains the data that is needed for the saga transaction order
             </summary>
         </member>
-        <member name="M:vgt_saga_serialization.MessageBodies.BackendRequest.#ctor">
-            <summary>
-            request from the backend 
-            contains the data that is needed for the saga transaction order
-            </summary>
-        </member>
         <member name="T:vgt_saga_serialization.MessageBodies.FlightReply">
-            <summary>
-            reply of the hotel service
-            </summary>
-        </member>
-        <member name="M:vgt_saga_serialization.MessageBodies.FlightReply.#ctor">
             <summary>
             reply of the hotel service
             </summary>
@@ -1053,13 +1039,6 @@
             </summary>
         </member>
         <member name="T:vgt_saga_serialization.MessageBodies.FlightRequest">
-            <summary>
-            request to the hotel service
-            contains definition if the reservation is temporary (wait for payment)
-            and all the data service needs
-            </summary>
-        </member>
-        <member name="M:vgt_saga_serialization.MessageBodies.FlightRequest.#ctor">
             <summary>
             request to the hotel service
             contains definition if the reservation is temporary (wait for payment)
@@ -1111,19 +1090,7 @@
             reply of the hotel service
             </summary>
         </member>
-        <member name="M:vgt_saga_serialization.MessageBodies.HotelReply.#ctor">
-            <summary>
-            reply of the hotel service
-            </summary>
-        </member>
         <member name="T:vgt_saga_serialization.MessageBodies.HotelRequest">
-            <summary>
-            request to the hotel service
-            contains definition if the reservation is temporary (wait for payment)
-            and all the data service needs
-            </summary>
-        </member>
-        <member name="M:vgt_saga_serialization.MessageBodies.HotelRequest.#ctor">
             <summary>
             request to the hotel service
             contains definition if the reservation is temporary (wait for payment)

@@ -69,6 +69,7 @@ public class OrderService : IDisposable
         
         //_queues.AddRepliesConsumer(SagaOrdersEventHandler);
         _queues.AddBackendConsumer(BackendOrdersEventHandler);
+        _queues.AddSagaConsumer(SagaOrdersEventHandler);
     }
 
     /// <summary>

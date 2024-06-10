@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using NLog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -193,6 +197,21 @@ public class OrderQueueHandler : IDisposable
         _backendRequests.BasicConsume(queue: _queueNames[2],
             autoAck: false,
             consumer: _backendConsumer);
+    }
+    
+    /// <summary>
+    /// Create queue consumer and hook to the event specifying incoming requests.
+    /// </summary>
+    /// <param name="handler"> handler to assign to the consumer event </param>
+    public void AddSagaConsumer(EventHandler<BasicDeliverEventArgs> handler)
+    {
+        _consumer = new EventingBasicConsumer(_sagaReplies);
+        _logger.Debug("{p}Added saga consumer", LoggerPrefix);
+        _consumer.Received += handler;
+        _logger.Debug("{p}Added saga event handler", LoggerPrefix);
+        _sagaReplies.BasicConsume(queue: _queueNames[2],
+            autoAck: false,
+            consumer: _consumer);
     }
 
     /// <summary>
