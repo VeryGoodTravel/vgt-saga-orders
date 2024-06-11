@@ -588,11 +588,6 @@
             current request handled
             </summary>
         </member>
-        <member name="P:vgt_saga_orders.OrderService.OrderHandler.CurrentReply">
-            <summary>
-            current reply handled
-            </summary>
-        </member>
         <member name="P:vgt_saga_orders.OrderService.OrderHandler.RequestsTask">
             <summary>
             Task of the requests handler
@@ -682,6 +677,12 @@
             <param name="state"> ack/reject </param>
         </member>
         <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.AddBackendConsumer(System.EventHandler{RabbitMQ.Client.Events.BasicDeliverEventArgs})">
+            <summary>
+            Create queue consumer and hook to the event specifying incoming requests.
+            </summary>
+            <param name="handler"> handler to assign to the consumer event </param>
+        </member>
+        <member name="M:vgt_saga_orders.OrderService.OrderQueueHandler.AddSagaConsumer(System.EventHandler{RabbitMQ.Client.Events.BasicDeliverEventArgs})">
             <summary>
             Create queue consumer and hook to the event specifying incoming requests.
             </summary>

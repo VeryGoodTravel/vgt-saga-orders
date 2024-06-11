@@ -37,10 +37,6 @@ public class OrderHandler
     /// </summary>
     public TransactionBody CurrentRequest { get; set; }
     
-    /// <summary>
-    /// current reply handled
-    /// </summary>
-    public Message CurrentReply { get; set; }
     private Logger _logger;
 
     private readonly SagaDbContext _db;
@@ -168,7 +164,7 @@ public class OrderHandler
         while (await OrchestratorMessages.Reader.WaitToReadAsync(Token))
         {
             var reply = await OrchestratorMessages.Reader.ReadAsync(Token);
-            if (CurrentReply.Body == null) continue;
+            if (reply.Body == null) continue;
             
             await DbLock.WaitAsync(Token);
             var dbData = await _db.Transactions.FirstOrDefaultAsync(p => p.TransactionId == reply.TransactionId, Token);
