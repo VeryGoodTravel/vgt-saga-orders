@@ -87,7 +87,7 @@ public class OrderService : IDisposable
             if (message.MessageType is MessageType.BackendReply or MessageType.BackendRequest)
             {
                 _logger.Debug("Sending to the backend {msg} {id} {state}", message.MessageType.ToString(), message.TransactionId, message.State);
-                _queues.PublishToBackend(JsonConvert.SerializeObject((BackendReply)message.Body));
+                _queues.PublishToBackend(JsonConvert.SerializeObject((BackendReply)message.Body), message.State == SagaState.SagaSuccess);
             }
             else
             {

@@ -26,6 +26,7 @@ To update those submodules in the local branch run:
 - RABBIT_PASSWORD -> User password to log in with.
 - BACKEND_REQUESTS -> Queue name of the requests from the backend.
 - BACKEND_REPLIES -> Exchange name to publish finished sagas to.
+- RABBIT_STATS ->  Queue of the Stats Saga replies.
 - RABBIT_REPLIES -> Queue of the replies sent back to the orchestrator.
 - RABBIT_ORDER -> Queue of the requests sent by the orchestrator to the order service.
 - RABBIT_PAYMENT -> Queue of the requests sent by the orchestrator to the payment gate service.

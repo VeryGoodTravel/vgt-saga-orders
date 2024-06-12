@@ -43,6 +43,7 @@ public class OrderQueueHandler : IDisposable
     private readonly IModel _sagaOrder;
     private readonly IModel _backendRequests;
     private readonly IModel _backendReplies;
+    private readonly IModel _statsReplies;
 
     // replies consumer
     private EventingBasicConsumer? _consumer;
@@ -115,6 +116,13 @@ public class OrderQueueHandler : IDisposable
             durable: true,
             autoDelete: false,
             arguments: new Dictionary<string, object>());
+        
+        _statsReplies = _connection.CreateModel();
+        _statsReplies.QueueDeclare(_queueNames[4],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _logger.Debug("{p}Initialized RabbitMq queues", LoggerPrefix);
         _logger.Info("{p}Initialized RabbitMq", LoggerPrefix);
@@ -138,11 +146,15 @@ public class OrderQueueHandler : IDisposable
     /// answers requests from the backend
     /// </summary>
     /// <param name="body"> json body of the message to send </param>
-    public void PublishToBackend(string body)
+    public void PublishToBackend(string body, bool stats = false)
     {
         _logger.Info("{p}Publishing a message to orchestrator", LoggerPrefix);
         _logger.Debug("{p}Response: {res}", LoggerPrefix, body);
         var bodyBytes = Encoding.UTF8.GetBytes(body);
+        if (stats)
+        {
+            _statsReplies.BasicPublish(_queueNames[3], string.Empty, null, bodyBytes);
+        }
         
         _sagaReplies.BasicPublish(_queueNames[3], string.Empty, null, bodyBytes);
     }
@@ -238,6 +250,9 @@ public class OrderQueueHandler : IDisposable
             string.IsNullOrEmpty(config.GetValue<string?>("BACKEND_REPLIES"))
                 ? ThrowException<string>("BACKEND_REPLIES")
                 : config.GetValue<string?>("BACKEND_REPLIES")!,
+            string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_STATS"))
+                ? ThrowException<string>("RABBIT_STATS")
+                : config.GetValue<string?>("RABBIT_STATS")!,
         };
 
         return result;

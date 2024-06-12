@@ -157,14 +157,26 @@ public class Orchestrator : IDisposable
         var message = reply.Value;
         
         _logger.Debug("Received response parsed | {tag} | {s} | {a}", message.TransactionId, message.MessageType, message.State);
+        
+        // var result = message.State switch
+        // {
+        //     SagaState.Begin or SagaState.SagaFail or SagaState.FlightFullFail or SagaState.FlightFullAccept or SagaState.HotelFullFail or SagaState.HotelFullAccept or SagaState.HotelTimedRollback or SagaState.FlightTimedRollback
+        //         => _repliesChannels[MessageType.OrderRequest].Writer.TryWrite(message),
+        //     // MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
+        //     //     => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
+        //     SagaState.PaymentAccept or SagaState.PaymentFailed or SagaState.HotelTimedAccept or SagaState.HotelTimedFail or SagaState.HotelTimedRollback 
+        //         or SagaState.FlightTimedAccept or SagaState.FlightTimedFail or SagaState.FlightTimedRollback
+        //         => _repliesChannels[MessageType.PaymentRequest].Writer.TryWrite(message),
+        //     _ => false
+        // };
 
         // send message reply to the appropriate task
         var result = message.MessageType switch
         {
             MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendReply or MessageType.BackendRequest
                 => _repliesChannels[MessageType.OrderRequest].Writer.TryWrite(message),
-            MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
-                => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
+            // MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
+            //     => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
             MessageType.PaymentReply or MessageType.PaymentRequest 
                 => _repliesChannels[MessageType.PaymentRequest].Writer.TryWrite(message),
             _ => false
