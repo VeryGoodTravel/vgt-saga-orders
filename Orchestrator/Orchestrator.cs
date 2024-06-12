@@ -175,8 +175,8 @@ public class Orchestrator : IDisposable
         {
             MessageType.OrderRequest or MessageType.OrderReply or MessageType.BackendReply or MessageType.BackendRequest
                 => _repliesChannels[MessageType.OrderRequest].Writer.TryWrite(message),
-            // MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
-            //     => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
+            MessageType.HotelReply or MessageType.HotelRequest or MessageType.FlightReply or MessageType.FlightRequest
+                => _repliesChannels[MessageType.HotelRequest].Writer.TryWrite(message),
             MessageType.PaymentReply or MessageType.PaymentRequest 
                 => _repliesChannels[MessageType.PaymentRequest].Writer.TryWrite(message),
             _ => false
