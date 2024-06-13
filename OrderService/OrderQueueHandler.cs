@@ -153,10 +153,10 @@ public class OrderQueueHandler : IDisposable
         var bodyBytes = Encoding.UTF8.GetBytes(body);
         if (stats)
         {
-            _statsReplies.BasicPublish(_queueNames[4], string.Empty, null, bodyBytes);
+            _statsReplies.BasicPublish(string.Empty, _queueNames[4], null, bodyBytes);
         }
         
-        _sagaReplies.BasicPublish(_queueNames[3], string.Empty, null, bodyBytes);
+        _backendReplies.BasicPublish(_queueNames[3], string.Empty, null, bodyBytes);
     }
 
     /// <summary>
